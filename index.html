@@ -57,7 +57,7 @@
           <div class="card-grid">
 
             <!-- Monday -->
-            <article class="workout-card reveal-on-scroll" data-difficulty="easy">
+            <article class="workout-card reveal-on-scroll" data-difficulty="easy" data-workout="run-monday">
               <div class="card-header">
                 <span class="day-name">Monday</span>
                 <span class="difficulty-badge">Easy</span>
@@ -71,7 +71,7 @@
             </article>
 
             <!-- Tuesday -->
-            <article class="workout-card reveal-on-scroll" data-difficulty="hard">
+            <article class="workout-card reveal-on-scroll" data-difficulty="hard" data-workout="run-tuesday">
               <div class="card-header">
                 <span class="day-name">Tuesday</span>
                 <span class="difficulty-badge">Hard</span>
@@ -85,7 +85,7 @@
             </article>
 
             <!-- Wednesday -->
-            <article class="workout-card reveal-on-scroll" data-difficulty="easy">
+            <article class="workout-card reveal-on-scroll" data-difficulty="easy" data-workout="run-wednesday">
               <div class="card-header">
                 <span class="day-name">Wednesday</span>
                 <span class="difficulty-badge">Easy</span>
@@ -99,7 +99,7 @@
             </article>
 
             <!-- Thursday -->
-            <article class="workout-card reveal-on-scroll" data-difficulty="hard">
+            <article class="workout-card reveal-on-scroll" data-difficulty="hard" data-workout="run-thursday">
               <div class="card-header">
                 <span class="day-name">Thursday</span>
                 <span class="difficulty-badge">Hard</span>
@@ -113,7 +113,7 @@
             </article>
 
             <!-- Friday -->
-            <article class="workout-card reveal-on-scroll" data-difficulty="rest">
+            <article class="workout-card reveal-on-scroll" data-difficulty="rest" data-workout="run-friday">
               <div class="card-header">
                 <span class="day-name">Friday</span>
                 <span class="difficulty-badge">Rest</span>
@@ -126,7 +126,7 @@
             </article>
 
             <!-- Saturday -->
-            <article class="workout-card reveal-on-scroll" data-difficulty="medium">
+            <article class="workout-card reveal-on-scroll" data-difficulty="medium" data-workout="run-saturday">
               <div class="card-header">
                 <span class="day-name">Saturday</span>
                 <span class="difficulty-badge">Medium</span>
@@ -140,7 +140,7 @@
             </article>
 
             <!-- Sunday (featured — spans 2 columns) -->
-            <article class="workout-card card--featured reveal-on-scroll" data-difficulty="long">
+            <article class="workout-card card--featured reveal-on-scroll" data-difficulty="long" data-workout="run-sunday">
               <div class="card-header">
                 <span class="day-name">Sunday</span>
                 <span class="difficulty-badge">Long</span>
@@ -249,7 +249,7 @@
           <div class="card-grid">
 
             <!-- Monday -->
-            <article class="workout-card reveal-on-scroll" data-difficulty="rest">
+            <article class="workout-card reveal-on-scroll" data-difficulty="rest" data-workout="tri-monday">
               <div class="card-header">
                 <span class="day-name">Monday</span>
                 <span class="difficulty-badge">Rest</span>
@@ -262,7 +262,7 @@
             </article>
 
             <!-- Tuesday -->
-            <article class="workout-card reveal-on-scroll" data-difficulty="hard">
+            <article class="workout-card reveal-on-scroll" data-difficulty="hard" data-workout="tri-tuesday">
               <div class="card-header">
                 <span class="day-name">Tuesday</span>
                 <span class="difficulty-badge">Hard</span>
@@ -276,7 +276,7 @@
             </article>
 
             <!-- Wednesday -->
-            <article class="workout-card reveal-on-scroll" data-difficulty="medium">
+            <article class="workout-card reveal-on-scroll" data-difficulty="medium" data-workout="tri-wednesday">
               <div class="card-header">
                 <span class="day-name">Wednesday</span>
                 <span class="difficulty-badge">Medium</span>
@@ -289,7 +289,7 @@
             </article>
 
             <!-- Thursday -->
-            <article class="workout-card reveal-on-scroll" data-difficulty="hard">
+            <article class="workout-card reveal-on-scroll" data-difficulty="hard" data-workout="tri-thursday">
               <div class="card-header">
                 <span class="day-name">Thursday</span>
                 <span class="difficulty-badge">Hard</span>
@@ -302,7 +302,7 @@
             </article>
 
             <!-- Friday -->
-            <article class="workout-card reveal-on-scroll" data-difficulty="medium">
+            <article class="workout-card reveal-on-scroll" data-difficulty="medium" data-workout="tri-friday">
               <div class="card-header">
                 <span class="day-name">Friday</span>
                 <span class="difficulty-badge">Medium</span>
@@ -315,7 +315,7 @@
             </article>
 
             <!-- Saturday (featured — spans 2 columns) -->
-            <article class="workout-card card--featured reveal-on-scroll" data-difficulty="long">
+            <article class="workout-card card--featured reveal-on-scroll" data-difficulty="long" data-workout="tri-saturday">
               <div class="card-header">
                 <span class="day-name">Saturday</span>
                 <span class="difficulty-badge">Long</span>
@@ -329,7 +329,7 @@
             </article>
 
             <!-- Sunday -->
-            <article class="workout-card reveal-on-scroll" data-difficulty="easy">
+            <article class="workout-card reveal-on-scroll" data-difficulty="easy" data-workout="tri-sunday">
               <div class="card-header">
                 <span class="day-name">Sunday</span>
                 <span class="difficulty-badge">Easy</span>
@@ -382,6 +382,25 @@
     </div><!-- /tab-tri -->
 
   </main>
+
+  <!-- Workout Detail Dialog -->
+  <dialog id="workout-dialog" class="workout-dialog">
+    <div class="dialog-inner">
+      <header class="dialog-header">
+        <div class="dialog-header-left">
+          <span class="dialog-day"></span>
+          <span class="dialog-difficulty"></span>
+        </div>
+        <button class="dialog-close" aria-label="Close">&times;</button>
+      </header>
+      <h2 class="dialog-title"></h2>
+      <div class="dialog-viz">
+        <div class="segment-bar"></div>
+        <div class="segment-labels"></div>
+      </div>
+      <p class="dialog-description"></p>
+    </div>
+  </dialog>
 
   <!-- Footer -->
   <footer>
