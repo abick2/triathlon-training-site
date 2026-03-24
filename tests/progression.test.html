@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Progression Tests</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      margin: 0;
+      background: #f5f5f5;
+      color: #1a1a1a;
+    }
+    h1 {
+      margin: 0;
+      padding: 1.5rem 2rem 1rem;
+      font-size: 1.25rem;
+      font-weight: 600;
+      border-bottom: 1px solid #e0e0e0;
+      background: #fff;
+    }
+    #summary {
+      padding: 1rem 2rem;
+      font-size: 0.9rem;
+      background: #fff;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    #summary .pass { color: #16a34a; font-weight: 600; }
+    #summary .fail { color: #dc2626; font-weight: 600; }
+    #results {
+      padding: 1rem 2rem 2rem;
+      max-width: 900px;
+    }
+    .group {
+      margin-bottom: 1.5rem;
+    }
+    .group-title {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #666;
+      margin-bottom: 0.5rem;
+    }
+    .test {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.5rem 0.75rem;
+      margin-bottom: 0.25rem;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      background: #fff;
+      border: 1px solid #e0e0e0;
+    }
+    .test.pass { border-left: 3px solid #16a34a; }
+    .test.fail { border-left: 3px solid #dc2626; background: #fff5f5; }
+    .status {
+      font-size: 0.8rem;
+      font-weight: 700;
+      min-width: 3.5rem;
+      padding-top: 1px;
+    }
+    .pass .status { color: #16a34a; }
+    .fail .status { color: #dc2626; }
+    .test-name { flex: 1; }
+    .test-detail {
+      font-size: 0.75rem;
+      color: #888;
+      margin-top: 0.15rem;
+    }
+    .test-error {
+      font-size: 0.75rem;
+      color: #dc2626;
+      margin-top: 0.15rem;
+    }
+    .mobile-note {
+      padding: 1rem 2rem;
+      background: #fffbeb;
+      border-top: 1px solid #fde68a;
+      font-size: 0.8rem;
+      color: #92400e;
+    }
+    .mobile-note h3 { margin: 0 0 0.5rem; font-size: 0.85rem; }
+    .mobile-note ul { margin: 0; padding-left: 1.25rem; }
+    .mobile-note li { margin-bottom: 0.25rem; }
+    iframe {
+      position: absolute;
+      left: -9999px;
+      width: 375px;   /* mobile width for layout tests */
+      height: 900px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Progression Section — Test Suite</h1>
+  <div id="summary">Loading…</div>
+  <div id="results"></div>
+  <div class="mobile-note">
+    <h3>Manual mobile checks (open index.html on device or resize browser to 375px):</h3>
+    <ul>
+      <li>Both progression charts visible and bars readable at 375px width</li>
+      <li>No horizontal scroll overflow at 375px (16 bars fit)</li>
+      <li>Phase labels display without overlapping text at 600px</li>
+      <li>Legend wraps cleanly at narrow widths</li>
+      <li>Touch scrolling works if chart overflows on very small screens</li>
+      <li>Scroll-reveal animations fire when switching tabs on mobile</li>
+    </ul>
+  </div>
+  <iframe id="frame" src="../index.html"></iframe>
+
+  <script>
+    const results = [];
+
+    function assert(name, condition, detail, errorMsg) {
+      results.push({ name, pass: !!condition, detail, error: errorMsg });
+    }
+
+    function runTests(doc, win) {
+      // =============================================
+      // 1. Data Integrity Tests
+      // =============================================
+
+      const runPlan = win.runPlan;
+      const triPlan = win.triPlan;
+
+      // runPlan exists and is structured correctly
+      assert('runPlan is defined', typeof runPlan === 'object' && runPlan !== null, 'window.runPlan must exist');
+      assert('triPlan is defined', typeof triPlan === 'object' && triPlan !== null, 'window.triPlan must exist');
+
+      if (runPlan) {
+        assert('runPlan has 16 weeks', runPlan.weeks && runPlan.weeks.length === 16,
+          `got ${runPlan.weeks?.length}`);
+        assert('runPlan.currentWeek is 14', runPlan.currentWeek === 14,
+          `got ${runPlan.currentWeek}`);
+        assert('runPlan.raceDate is set', typeof runPlan.raceDate === 'string' && runPlan.raceDate.length > 0,
+          runPlan.raceDate);
+        assert('runPlan week 14 has 50 miles', runPlan.weeks?.[13]?.miles === 50,
+          `got ${runPlan.weeks?.[13]?.miles}`);
+
+        const validPhases = ['base', 'build-1', 'build-2', 'peak', 'taper'];
+        const badRunPhases = runPlan.weeks?.filter(w => !validPhases.includes(w.phase));
+        assert('runPlan all weeks have valid phases', badRunPhases?.length === 0,
+          null, badRunPhases?.length ? 'invalid phases: ' + badRunPhases.map(w => w.phase).join(', ') : null);
+
+        const negRunMiles = runPlan.weeks?.filter(w => w.miles <= 0);
+        assert('runPlan all mileage values are positive', negRunMiles?.length === 0,
+          null, negRunMiles?.length ? 'non-positive miles in weeks: ' + negRunMiles.map(w => w.week).join(', ') : null);
+      }
+
+      if (triPlan) {
+        assert('triPlan has 16 weeks', triPlan.weeks && triPlan.weeks.length === 16,
+          `got ${triPlan.weeks?.length}`);
+        assert('triPlan.currentWeek is 14', triPlan.currentWeek === 14,
+          `got ${triPlan.currentWeek}`);
+        assert('triPlan.raceDate is set', typeof triPlan.raceDate === 'string' && triPlan.raceDate.length > 0,
+          triPlan.raceDate);
+
+        const wk14 = triPlan.weeks?.[13];
+        assert('triPlan week 14: swim=4900', wk14?.swim === 4900, `got ${wk14?.swim}`);
+        assert('triPlan week 14: bike=65',   wk14?.bike === 65,   `got ${wk14?.bike}`);
+        assert('triPlan week 14: run=20',    wk14?.run  === 20,   `got ${wk14?.run}`);
+
+        const validPhases = ['base', 'build-1', 'build-2', 'peak', 'taper'];
+        const badTriPhases = triPlan.weeks?.filter(w => !validPhases.includes(w.phase));
+        assert('triPlan all weeks have valid phases', badTriPhases?.length === 0,
+          null, badTriPhases?.length ? 'invalid phases: ' + badTriPhases.map(w => w.phase).join(', ') : null);
+      }
+
+      // =============================================
+      // 2. DOM Rendering Tests
+      // =============================================
+
+      const runChart  = doc.getElementById('run-progression-chart');
+      const triChart  = doc.getElementById('tri-progression-chart');
+      const runPhases = doc.getElementById('run-progression-phases');
+      const triPhases = doc.getElementById('tri-progression-phases');
+      const runDate   = doc.getElementById('run-race-date');
+      const triDate   = doc.getElementById('tri-race-date');
+
+      // Chart containers exist
+      assert('run-progression-chart exists in DOM', !!runChart);
+      assert('tri-progression-chart exists in DOM', !!triChart);
+
+      if (runChart) {
+        const weeks = runChart.querySelectorAll('.prog-week');
+        assert('Run chart renders 16 .prog-week elements', weeks.length === 16, `got ${weeks.length}`);
+
+        const currentWeeks = runChart.querySelectorAll('.prog-week--current');
+        assert('Run chart has exactly 1 current week', currentWeeks.length === 1, `got ${currentWeeks.length}`);
+
+        const currentEl = currentWeeks[0];
+        const allWeeks  = Array.from(weeks);
+        const currentIdx = allWeeks.indexOf(currentEl);
+        assert('Run current week is week 14 (index 13)', currentIdx === 13, `got index ${currentIdx}`);
+
+        const futureWeeks = runChart.querySelectorAll('.prog-week--future');
+        assert('Run chart has 2 future weeks (wk 15-16)', futureWeeks.length === 2, `got ${futureWeeks.length}`);
+
+        // Verify no past/current week is marked future
+        const pastOrCurrent = allWeeks.slice(0, 14);
+        const wronglyFuture = pastOrCurrent.filter(el => el.classList.contains('prog-week--future'));
+        assert('No past/current week has future class', wronglyFuture.length === 0,
+          null, wronglyFuture.length ? `${wronglyFuture.length} weeks incorrectly marked future` : null);
+
+        // Bars have prog-bar children
+        const bars = runChart.querySelectorAll('.prog-bar');
+        assert('Run chart bars have .prog-bar elements', bars.length === 16, `got ${bars.length}`);
+      }
+
+      if (triChart) {
+        const weeks = triChart.querySelectorAll('.prog-week');
+        assert('Tri chart renders 16 .prog-week elements', weeks.length === 16, `got ${weeks.length}`);
+
+        const currentWeeks = triChart.querySelectorAll('.prog-week--current');
+        assert('Tri chart has exactly 1 current week', currentWeeks.length === 1, `got ${currentWeeks.length}`);
+
+        const futureWeeks = triChart.querySelectorAll('.prog-week--future');
+        assert('Tri chart has 2 future weeks (wk 15-16)', futureWeeks.length === 2, `got ${futureWeeks.length}`);
+
+        // Stacked bars
+        const stacks = triChart.querySelectorAll('.prog-bar-stack');
+        assert('Tri chart has stacked bar elements', stacks.length === 16, `got ${stacks.length}`);
+
+        const firstStack = stacks[0];
+        if (firstStack) {
+          const segs = firstStack.querySelectorAll('.prog-seg');
+          assert('Each stacked bar has 3 segments (swim/bike/run)', segs.length === 3, `got ${segs.length}`);
+
+          const hasSwim = firstStack.querySelector('.prog-seg--swim');
+          const hasBike = firstStack.querySelector('.prog-seg--bike');
+          const hasRun  = firstStack.querySelector('.prog-seg--run');
+          assert('Stacked bar has swim segment', !!hasSwim);
+          assert('Stacked bar has bike segment', !!hasBike);
+          assert('Stacked bar has run segment',  !!hasRun);
+        }
+      }
+
+      // Phase spans
+      if (runPhases) {
+        const spans = runPhases.querySelectorAll('.phase-span');
+        assert('Run phases renders phase spans', spans.length > 0, `got ${spans.length}`);
+        // Total flex should sum to 16 (one per week)
+        let flexSum = 0;
+        spans.forEach(s => { flexSum += parseInt(s.style.flex || '0', 10); });
+        assert('Run phase spans flex values sum to 16', flexSum === 16, `sum = ${flexSum}`);
+      }
+
+      if (triPhases) {
+        const spans = triPhases.querySelectorAll('.phase-span');
+        assert('Tri phases renders phase spans', spans.length > 0, `got ${spans.length}`);
+        let flexSum = 0;
+        spans.forEach(s => { flexSum += parseInt(s.style.flex || '0', 10); });
+        assert('Tri phase spans flex values sum to 16', flexSum === 16, `sum = ${flexSum}`);
+      }
+
+      // Race date text
+      if (runDate) {
+        assert('Run race date is populated', runDate.textContent.trim().length > 0, runDate.textContent.trim());
+      }
+      if (triDate) {
+        assert('Tri race date is populated', triDate.textContent.trim().length > 0, triDate.textContent.trim());
+      }
+      if (runDate && triDate) {
+        assert('Run and Tri race dates match', runDate.textContent.trim() === triDate.textContent.trim(),
+          `run="${runDate.textContent.trim()}" tri="${triDate.textContent.trim()}"`);
+      }
+
+      // Labels and values exist
+      if (runChart) {
+        const values = runChart.querySelectorAll('.prog-value');
+        const labels = runChart.querySelectorAll('.prog-label');
+        assert('Run chart has 16 mileage value labels', values.length === 16, `got ${values.length}`);
+        assert('Run chart has 16 week labels',           labels.length === 16, `got ${labels.length}`);
+        // Check first value says "25 mi"
+        assert('Run week 1 value shows "25 mi"', values[0]?.textContent === '25 mi', `got "${values[0]?.textContent}"`);
+        // Check week 14 value says "50 mi"
+        assert('Run week 14 value shows "50 mi"', values[13]?.textContent === '50 mi', `got "${values[13]?.textContent}"`);
+      }
+
+      // =============================================
+      // 3. Layout / Overflow Tests (at 375px iframe width)
+      // =============================================
+
+      if (runChart) {
+        const chartRect = runChart.getBoundingClientRect();
+        // Chart should have non-zero dimensions
+        assert('Run chart has non-zero height', chartRect.height > 0, `height = ${Math.round(chartRect.height)}px`);
+        assert('Run chart has non-zero width',  chartRect.width  > 0, `width = ${Math.round(chartRect.width)}px`);
+
+        // scrollWidth should not exceed offsetWidth + a small tolerance (no overflow)
+        const overflowing = runChart.scrollWidth > runChart.offsetWidth + 2;
+        assert(
+          'Run chart does not overflow horizontally at 375px',
+          !overflowing,
+          `scrollWidth=${runChart.scrollWidth} offsetWidth=${runChart.offsetWidth}`
+        );
+      }
+
+      if (triChart) {
+        const overflowing = triChart.scrollWidth > triChart.offsetWidth + 2;
+        assert(
+          'Tri chart does not overflow horizontally at 375px',
+          !overflowing,
+          `scrollWidth=${triChart.scrollWidth} offsetWidth=${triChart.offsetWidth}`
+        );
+      }
+    }
+
+    // =============================================
+    // Render results
+    // =============================================
+    function render() {
+      const groups = {
+        'Data Integrity': results.filter((_, i) => i < 16),
+        'DOM Rendering':  results.filter((_, i) => i >= 16 && i < results.length - 2),
+        'Layout / Overflow (375px)': results.slice(-2),
+      };
+
+      const total  = results.length;
+      const passed = results.filter(r => r.pass).length;
+      const failed = total - passed;
+
+      const summary = document.getElementById('summary');
+      summary.innerHTML =
+        `<span class="pass">${passed} passed</span>&nbsp;&nbsp;` +
+        (failed ? `<span class="fail">${failed} failed</span>&nbsp;&nbsp;` : '') +
+        `<span style="color:#666">${total} total</span>`;
+
+      const container = document.getElementById('results');
+
+      Object.entries(groups).forEach(([groupName, tests]) => {
+        if (!tests.length) return;
+        const groupEl = document.createElement('div');
+        groupEl.className = 'group';
+
+        const title = document.createElement('div');
+        title.className = 'group-title';
+        title.textContent = groupName;
+        groupEl.appendChild(title);
+
+        tests.forEach(t => {
+          const el = document.createElement('div');
+          el.className = 'test ' + (t.pass ? 'pass' : 'fail');
+          el.innerHTML =
+            `<span class="status">${t.pass ? 'PASS' : 'FAIL'}</span>` +
+            `<span class="test-name">${t.name}` +
+              (t.detail ? `<div class="test-detail">${t.detail}</div>` : '') +
+              (t.error  ? `<div class="test-error">${t.error}</div>`  : '') +
+            `</span>`;
+          groupEl.appendChild(el);
+        });
+
+        container.appendChild(groupEl);
+      });
+    }
+
+    // Wait for iframe to fully load, then run tests
+    const frame = document.getElementById('frame');
+    frame.addEventListener('load', () => {
+      // Give JS a moment to finish rendering
+      setTimeout(() => {
+        try {
+          runTests(frame.contentDocument, frame.contentWindow);
+        } catch (e) {
+          results.push({ name: 'Test runner error', pass: false, error: e.message });
+        }
+        render();
+      }, 200);
+    });
+  </script>
+</body>
+</html>
