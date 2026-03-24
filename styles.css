@@ -118,7 +118,7 @@ header {
    Hero Section
    ============================================ */
 .hero {
-  padding: var(--space-md) 0 var(--space-xl);
+  padding: 0.5rem 0 var(--space-xl);
 }
 
 .hero-mileage {
