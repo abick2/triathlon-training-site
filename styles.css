@@ -419,6 +419,10 @@ footer {
     padding: var(--space-lg) 0;
   }
 
+  .hero {
+    padding-top: 1rem;
+  }
+
   .card-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -447,6 +451,10 @@ footer {
     --space-md: 1.25rem;
     --space-lg: 2.5rem;
     --space-xl: 4rem;
+  }
+
+  .hero {
+    padding-top: 1rem;
   }
 
   .container {
