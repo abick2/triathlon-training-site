@@ -713,6 +713,132 @@
           }
         });
       });
+
+      // ============================================
+      // Training Plan Progression Data
+      // ============================================
+      const runPlan = {
+        raceDate: 'May 3, 2026',
+        raceName: 'Half-Marathon',
+        currentWeek: 14,
+        weeks: [
+          { week: 1,  miles: 25, phase: 'base' },
+          { week: 2,  miles: 28, phase: 'base' },
+          { week: 3,  miles: 30, phase: 'base' },
+          { week: 4,  miles: 24, phase: 'base' },
+          { week: 5,  miles: 32, phase: 'build-1' },
+          { week: 6,  miles: 35, phase: 'build-1' },
+          { week: 7,  miles: 38, phase: 'build-1' },
+          { week: 8,  miles: 30, phase: 'build-1' },
+          { week: 9,  miles: 40, phase: 'build-2' },
+          { week: 10, miles: 43, phase: 'build-2' },
+          { week: 11, miles: 45, phase: 'build-2' },
+          { week: 12, miles: 36, phase: 'build-2' },
+          { week: 13, miles: 48, phase: 'peak' },
+          { week: 14, miles: 50, phase: 'peak' },
+          { week: 15, miles: 40, phase: 'taper' },
+          { week: 16, miles: 28, phase: 'taper' },
+        ]
+      };
+
+      const triPlan = {
+        raceDate: 'May 3, 2026',
+        raceName: 'Olympic Triathlon',
+        currentWeek: 14,
+        weeks: [
+          { week: 1,  swim: 2800, bike: 35, run: 10, phase: 'base' },
+          { week: 2,  swim: 3200, bike: 38, run: 12, phase: 'base' },
+          { week: 3,  swim: 3500, bike: 42, run: 13, phase: 'base' },
+          { week: 4,  swim: 2800, bike: 35, run: 10, phase: 'base' },
+          { week: 5,  swim: 3800, bike: 48, run: 15, phase: 'build-1' },
+          { week: 6,  swim: 4000, bike: 50, run: 16, phase: 'build-1' },
+          { week: 7,  swim: 4200, bike: 55, run: 17, phase: 'build-1' },
+          { week: 8,  swim: 3500, bike: 45, run: 14, phase: 'build-1' },
+          { week: 9,  swim: 4400, bike: 58, run: 18, phase: 'build-2' },
+          { week: 10, swim: 4600, bike: 60, run: 19, phase: 'build-2' },
+          { week: 11, swim: 4800, bike: 63, run: 20, phase: 'build-2' },
+          { week: 12, swim: 4000, bike: 52, run: 16, phase: 'build-2' },
+          { week: 13, swim: 5000, bike: 65, run: 20, phase: 'peak' },
+          { week: 14, swim: 4900, bike: 65, run: 20, phase: 'peak' },
+          { week: 15, swim: 3800, bike: 50, run: 15, phase: 'taper' },
+          { week: 16, swim: 2500, bike: 30, run: 10, phase: 'taper' },
+        ]
+      };
+
+      function renderProgression(plan, chartId, phasesId, dateLabelId, isTri) {
+        const chart = document.getElementById(chartId);
+        const phases = document.getElementById(phasesId);
+        const dateLabel = document.getElementById(dateLabelId);
+
+        dateLabel.textContent = plan.raceDate;
+
+        const maxTotal = Math.max(...plan.weeks.map(w => {
+          if (isTri) return w.bike + w.run + Math.round(w.swim / 1760);
+          return w.miles;
+        }));
+
+        plan.weeks.forEach(w => {
+          const total = isTri ? w.bike + w.run + Math.round(w.swim / 1760) : w.miles;
+          const pct = (total / maxTotal) * 100;
+
+          const div = document.createElement('div');
+          div.className = 'prog-week prog-week--' + w.phase;
+          if (w.week === plan.currentWeek) div.classList.add('prog-week--current');
+          if (w.week > plan.currentWeek)   div.classList.add('prog-week--future');
+
+          if (isTri) {
+            const swimMi = Math.round(w.swim / 1760);
+            div.style.setProperty('--prog-total', pct);
+            div.innerHTML =
+              '<div class="prog-bar-stack">' +
+                '<div class="prog-seg prog-seg--run"  style="--seg-pct: ' + w.run   + '"></div>' +
+                '<div class="prog-seg prog-seg--bike" style="--seg-pct: ' + w.bike  + '"></div>' +
+                '<div class="prog-seg prog-seg--swim" style="--seg-pct: ' + swimMi  + '"></div>' +
+              '</div>' +
+              '<span class="prog-value">' + total + ' mi</span>' +
+              '<span class="prog-label">Wk ' + w.week + '</span>';
+          } else {
+            div.style.setProperty('--prog-pct', pct);
+            div.innerHTML =
+              '<div class="prog-bar"></div>' +
+              '<span class="prog-value">' + w.miles + ' mi</span>' +
+              '<span class="prog-label">Wk ' + w.week + '</span>';
+          }
+
+          chart.appendChild(div);
+        });
+
+        // Build proportional phase span labels
+        const phaseGroups = [];
+        let cur = null;
+        plan.weeks.forEach(w => {
+          if (!cur || cur.phase !== w.phase) {
+            cur = { phase: w.phase, count: 1 };
+            phaseGroups.push(cur);
+          } else {
+            cur.count++;
+          }
+        });
+
+        const phaseNames = {
+          'base':    'Base',
+          'build-1': 'Build I',
+          'build-2': 'Build II',
+          'peak':    'Peak',
+          'taper':   'Taper'
+        };
+
+        phaseGroups.forEach(g => {
+          const span = document.createElement('span');
+          span.className = 'phase-span';
+          span.style.flex = g.count;
+          span.textContent = phaseNames[g.phase] || g.phase;
+          phases.appendChild(span);
+        });
+      }
+
+      renderProgression(runPlan, 'run-progression-chart', 'run-progression-phases', 'run-race-date', false);
+      renderProgression(triPlan, 'tri-progression-chart', 'tri-progression-phases', 'tri-race-date', true);
     });
   </script>
 
