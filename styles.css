@@ -588,6 +588,198 @@ footer {
 .card-grid .workout-card:nth-child(7) { transition-delay: 0.48s; }
 
 /* ============================================
+   Workout Detail Dialog
+   ============================================ */
+.workout-card[data-workout] {
+  cursor: pointer;
+}
+
+.workout-dialog {
+  border: none;
+  border-radius: var(--radius);
+  padding: 0;
+  max-width: 640px;
+  width: calc(100% - 2 * var(--space-md));
+  background: var(--color-bg);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.15);
+  animation: dialog-in 0.25s ease;
+}
+
+.workout-dialog::backdrop {
+  background: rgba(26, 26, 26, 0.5);
+  animation: backdrop-in 0.25s ease;
+}
+
+@keyframes dialog-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes backdrop-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.dialog-inner {
+  padding: var(--space-md);
+}
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-sm);
+}
+
+.dialog-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.dialog-day {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--color-secondary);
+}
+
+.dialog-difficulty {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-pill);
+}
+
+.dialog-difficulty[data-intensity="easy"]   { color: var(--color-secondary); border: 1px solid var(--color-border-light); }
+.dialog-difficulty[data-intensity="medium"] { color: var(--color-dark); background: var(--color-border); }
+.dialog-difficulty[data-intensity="hard"]   { color: #fff; background: var(--color-dark); }
+.dialog-difficulty[data-intensity="long"]   { color: #fff; background: var(--color-dark-85); }
+.dialog-difficulty[data-intensity="rest"]   { color: var(--color-secondary); border: 1px dashed var(--color-border-light); }
+
+.dialog-close {
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  width: 2rem;
+  height: 2rem;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: var(--color-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: color var(--transition), border-color var(--transition);
+}
+
+.dialog-close:hover {
+  color: var(--color-dark);
+  border-color: var(--color-dark);
+}
+
+.dialog-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  margin-bottom: var(--space-md);
+}
+
+/* Segment visualization bar */
+.segment-bar {
+  display: flex;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  gap: 2px;
+  margin-bottom: 0.5rem;
+}
+
+.dialog-viz--rest .segment-bar {
+  display: none;
+}
+
+.dialog-viz--rest::after {
+  content: 'No structured workout — rest and recover.';
+  display: block;
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: 0.9rem;
+  color: var(--color-secondary);
+  padding: var(--space-sm) 0;
+  margin-bottom: var(--space-sm);
+}
+
+.segment {
+  border-radius: 2px;
+  position: relative;
+  min-width: 4px;
+  transition: opacity 0.15s ease;
+}
+
+.segment-bar:hover .segment { opacity: 0.35; }
+.segment-bar:hover .segment:hover { opacity: 1; }
+
+/* Intensity — grayscale (Run tab) */
+.segment--easy     { background: var(--color-border); }
+.segment--moderate { background: #999; }
+.segment--hard     { background: var(--color-dark); }
+.segment--recovery { background: var(--color-surface); outline: 1px dashed var(--color-border-light); }
+
+/* Sport overrides (Tri tab) */
+.segment--sport-swim                       { background: #bfdbfe; }
+.segment--sport-swim.segment--hard         { background: #1d4ed8; }
+.segment--sport-swim.segment--moderate     { background: #60a5fa; }
+.segment--sport-bike                       { background: #bbf7d0; }
+.segment--sport-bike.segment--hard         { background: #15803d; }
+.segment--sport-bike.segment--moderate     { background: #4ade80; }
+.segment--sport-run                        { background: #fde68a; }
+.segment--sport-run.segment--hard          { background: #d97706; }
+.segment--sport-run.segment--moderate      { background: #fbbf24; }
+
+/* Segment labels row */
+.segment-labels {
+  display: flex;
+  gap: 2px;
+  margin-bottom: var(--space-md);
+}
+
+.dialog-viz--rest .segment-labels {
+  display: none;
+}
+
+.segment-label-item {
+  font-family: var(--font-body);
+  font-size: 0.58rem;
+  font-weight: 400;
+  color: var(--color-secondary);
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.6;
+  min-width: 0;
+}
+
+/* Description */
+.dialog-description {
+  font-family: var(--font-body);
+  font-weight: 300;
+  font-size: 0.95rem;
+  color: var(--color-secondary);
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* ============================================
    Responsive
    ============================================ */
 @media (max-width: 900px) {
@@ -659,5 +851,23 @@ footer {
 
   .tri-summary-sport {
     grid-template-columns: 3rem 1fr 4.5rem;
+  }
+
+  .workout-dialog {
+    max-width: 100%;
+    width: 100%;
+    margin: 0;
+    border-radius: var(--radius) var(--radius) 0 0;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+  }
+
+  .segment-bar {
+    height: 32px;
+  }
+
+  .segment-label-item {
+    font-size: 0.5rem;
   }
 }
