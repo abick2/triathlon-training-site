@@ -30,6 +30,8 @@
   --color-phase-build: #888888;
   --color-phase-peak: #1a1a1a;
   --color-phase-taper: #aaaaaa;
+
+  --bar-scale: 1.4px;   /* max bar ≈ 140px; fits in 180px chart w/ ~40px labels */
 }
 
 /* ============================================
@@ -835,7 +837,7 @@ footer {
 .prog-bar {
   width: 100%;
   border-radius: var(--radius-sm) var(--radius-sm) 0 0;
-  height: calc(var(--prog-pct) * 1.6px);
+  height: calc(var(--prog-pct) * var(--bar-scale));
   min-height: 2px;
   transition: height 0.8s ease;
 }
@@ -945,7 +947,7 @@ footer {
   flex-direction: column-reverse;
   border-radius: var(--radius-sm) var(--radius-sm) 0 0;
   overflow: hidden;
-  height: calc(var(--prog-total) * 1.6px);
+  height: calc(var(--prog-total) * var(--bar-scale));
   min-height: 2px;
   transition: height 0.8s ease;
 }
@@ -1004,6 +1006,10 @@ footer {
   .prog-week {
     min-width: 2rem;
   }
+
+  :root {
+    --bar-scale: 0.94px;  /* max bar ≈ 94px; fits in 140px chart w/ ~46px labels */
+  }
 }
 
 @media (max-width: 600px) {
@@ -1011,6 +1017,7 @@ footer {
     --space-md: 1.25rem;
     --space-lg: 2.5rem;
     --space-xl: 4rem;
+    --bar-scale: 0.72px;  /* max bar ≈ 72px; fits in 120px chart w/ ~48px labels */
   }
 
   .hero {
