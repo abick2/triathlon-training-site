@@ -910,9 +910,15 @@ footer {
 /* Legend */
 .progression-legend {
   display: flex;
-  gap: var(--space-md);
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 0.5rem;
   margin-top: var(--space-xs);
+}
+
+.legend-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
 }
 
 .legend-item {
@@ -1083,7 +1089,7 @@ footer {
     font-size: 0.5rem;
   }
 
-  .progression-legend {
+  .legend-row {
     gap: var(--space-sm);
   }
 }
