@@ -291,6 +291,15 @@ header {
   color: var(--color-secondary);
 }
 
+.tri-dist {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: 1.1rem;
+  letter-spacing: -0.02em;
+  color: var(--color-secondary);
+  margin-left: auto;
+}
+
 /* ============================================
    Summary Section
    ============================================ */

@@ -272,6 +272,7 @@
               <div class="card-footer">
                 <span class="sport-badge sport-badge--bike">Bike</span>
                 <span class="sport-badge sport-badge--run">Run</span>
+                <span class="tri-dist">25+3 mi</span>
               </div>
             </article>
 
@@ -285,6 +286,7 @@
               <p class="workout-detail">2,750 yds steady-state at comfortable aerobic pace throughout.</p>
               <div class="card-footer">
                 <span class="sport-badge sport-badge--swim">Swim</span>
+                <span class="tri-dist">2,750 yds</span>
               </div>
             </article>
 
@@ -298,6 +300,7 @@
               <p class="workout-detail">2 mi warm-up &middot; 6&times;800 m at 5K pace &middot; 90 sec rest &middot; 1 mi cool-down</p>
               <div class="card-footer">
                 <span class="sport-badge sport-badge--run">Run</span>
+                <span class="tri-dist">6 mi</span>
               </div>
             </article>
 
@@ -311,6 +314,7 @@
               <p class="workout-detail">440 yds warm-up &middot; 5&times;220 yds at threshold pace &middot; 440 yds cool-down</p>
               <div class="card-footer">
                 <span class="sport-badge sport-badge--swim">Swim</span>
+                <span class="tri-dist">1,980 yds</span>
               </div>
             </article>
 
@@ -325,6 +329,7 @@
               <div class="card-footer">
                 <span class="sport-badge sport-badge--bike">Bike</span>
                 <span class="sport-badge sport-badge--run">Run</span>
+                <span class="tri-dist">40+3 mi</span>
               </div>
             </article>
 
@@ -338,6 +343,7 @@
               <p class="workout-detail">8 mi easy, conversational pace — aerobic base building, no intensity.</p>
               <div class="card-footer">
                 <span class="sport-badge sport-badge--run">Run</span>
+                <span class="tri-dist">8 mi</span>
               </div>
             </article>
 
@@ -461,13 +467,13 @@
 
       const workoutData = {
         'run-monday': {
-          description: 'A gentle shakeout to flush out accumulated fatigue and promote blood flow. Conversational effort only — if you can\'t hold a conversation, you\'re going too hard.',
+          description: 'A gentle 4-mile shakeout to flush out accumulated fatigue and promote blood flow. Conversational effort only — if you can\'t hold a conversation, you\'re going too hard.',
           segments: [
             { label: 'Easy run', minutes: 35, intensity: 'easy' }
           ]
         },
         'run-tuesday': {
-          description: 'VO₂max intervals develop your top-end aerobic capacity. The 5×1K repeats at 5K pace push your oxygen uptake ceiling, separated by easy recovery jogs to let your heart rate come down before the next effort.',
+          description: '2-mile warm-up, then 5×1K at 5K pace with recovery jogs between, finishing with a 2-mile cool-down (8 mi total). Each 1K should feel like your hardest sustainable effort — the recovery jog fully resets you before the next rep.',
           segments: [
             { label: 'Warm-up',    minutes: 18, intensity: 'easy' },
             { label: '1K @ 5K',   minutes: 4,  intensity: 'hard' },
@@ -483,13 +489,13 @@
           ]
         },
         'run-wednesday': {
-          description: 'A steady Zone 2 aerobic run that builds your aerobic base without accumulating fatigue. Heart rate stays controlled throughout — this trains the fat-burning engine and aids recovery.',
+          description: 'A steady 6-mile Zone 2 run at controlled effort — heart rate stays aerobic throughout. This trains your fat-burning engine and aids recovery without adding fatigue ahead of Thursday\'s tempo.',
           segments: [
             { label: 'Zone 2 run', minutes: 55, intensity: 'moderate' }
           ]
         },
         'run-thursday': {
-          description: 'Threshold work at half-marathon goal pace trains your body to sustain race pace comfortably. The 5-mile sustained effort raises your lactate threshold and teaches pacing discipline.',
+          description: '1.5-mile warm-up, 5 miles at half-marathon goal pace, 1.5-mile cool-down (8 mi total). The sustained tempo effort raises your lactate threshold and teaches you what race pace actually feels like under fatigue.',
           segments: [
             { label: 'Warm-up',       minutes: 14, intensity: 'easy' },
             { label: 'HM goal pace',  minutes: 42, intensity: 'hard' },
@@ -497,11 +503,11 @@
           ]
         },
         'run-friday': {
-          description: 'Full rest before the weekend training block. Use this day to sleep, eat well, hydrate, and let your body consolidate the adaptations from Tuesday and Thursday\'s harder sessions.',
+          description: 'Full rest before the weekend block. Sleep, eat well, and hydrate — this is when Tuesday\'s VO₂max work and Thursday\'s tempo actually produce adaptation.',
           segments: []
         },
         'run-saturday': {
-          description: 'A moderate aerobic run with four 20-second strides at the end. The strides activate fast-twitch fibers and improve neuromuscular efficiency — run them at mile race effort with full recovery between each.',
+          description: 'A 10-mile aerobic run finishing with 4×20-second strides. Run the strides at near-mile effort in the final mile — relaxed but fast — with a full walk recovery between each. They prime neuromuscular efficiency without adding fatigue.',
           segments: [
             { label: 'Aerobic run', minutes: 78, intensity: 'moderate' },
             { label: 'Stride',      minutes: 1,  intensity: 'hard' },
@@ -514,18 +520,18 @@
           ]
         },
         'run-sunday': {
-          description: 'The week\'s cornerstone long run. Stay easy-to-moderate for the first 11 miles, then allow pace to drift down to marathon effort for the final 3 — teaching your legs to finish strong when fatigued.',
+          description: 'A 14-mile long run — easy to moderate for the first 11, then drift down to marathon effort for the final 3. Running faster when already fatigued is the single most race-specific stimulus in half-marathon training.',
           segments: [
             { label: 'Easy–moderate', minutes: 88, intensity: 'easy' },
             { label: 'Marathon drift', minutes: 24, intensity: 'moderate' }
           ]
         },
         'tri-monday': {
-          description: 'Complete rest after the weekend\'s long efforts. Spend 15–20 minutes on light stretching or foam rolling to aid recovery, but no structured training today.',
+          description: 'Complete rest after Saturday\'s race-sim brick and Sunday\'s long run. Spend 15–20 minutes on light stretching or foam rolling, but no structured training.',
           segments: []
         },
         'tri-tuesday': {
-          description: 'A key brick session pairing a tempo bike with race-effort surges followed by an immediate transition run. The run-off-the-bike feeling is disorienting — this session trains your legs to adapt quickly.',
+          description: 'A 25-mile ride (tempo pace with 3×8 min at race effort) immediately followed by a 3-mile transition run. The 3×8 race-effort surges simulate the hardest parts of the bike leg, and the run-off-the-bike trains the disorienting T2 adaptation.',
           segments: [
             { label: 'Bike warm-up',    minutes: 15, intensity: 'easy',     sport: 'bike' },
             { label: 'Tempo ride',      minutes: 50, intensity: 'moderate', sport: 'bike' },
@@ -539,13 +545,13 @@
           ]
         },
         'tri-wednesday': {
-          description: 'A continuous aerobic swim at a comfortable, sustainable pace. Focus on stroke efficiency — long, relaxed catches and smooth rotation. This builds your swim-specific aerobic base.',
+          description: '2,750 yards of continuous steady-state swimming at a comfortable aerobic pace. Focus on stroke efficiency — long, relaxed catches and smooth rotation — rather than speed. This builds the swim-specific aerobic base for race day.',
           segments: [
             { label: 'Steady swim', minutes: 55, intensity: 'moderate', sport: 'swim' }
           ]
         },
         'tri-thursday': {
-          description: 'Track-style speed work that develops run economy and top-end speed, which translates directly to faster threshold and race paces. The 90-second rests are full recovery — hit each 800m at genuine 5K effort.',
+          description: '2-mile warm-up, 6×800m at 5K pace with 90-second rest between each, 1-mile cool-down (6 mi total). The 90-second rests are true recovery — each 800 should be run at honest 5K effort, not a cruise.',
           segments: [
             { label: 'Warm-up',      minutes: 18, intensity: 'easy' },
             { label: '800m @ 5K',   minutes: 3,  intensity: 'hard' },
@@ -563,7 +569,7 @@
           ]
         },
         'tri-friday': {
-          description: 'A short swim with quality threshold intervals. The 5×220-yard sets at threshold pace build speed-endurance in the water. Threshold effort in swimming is roughly 80–85% of max heart rate.',
+          description: '440-yard warm-up, 5×220 yards at threshold pace, 440-yard cool-down (1,980 yds total). Threshold in the water is roughly 80–85% of max HR — hard enough to feel it but sustainable for each 220-yard rep.',
           segments: [
             { label: 'Warm-up',           minutes: 10, intensity: 'easy',     sport: 'swim' },
             { label: '220 yd threshold',  minutes: 3,  intensity: 'hard',     sport: 'swim' },
@@ -579,7 +585,7 @@
           ]
         },
         'tri-saturday': {
-          description: 'The week\'s longest and most race-specific session. A 40-mile ride at Olympic race pace simulates the full bike leg, immediately followed by a 3-mile run off the bike to rehearse the T2 transition at tired legs.',
+          description: '40 miles at Olympic race pace — simulating the entire bike leg — then immediately 3 miles off the bike to rehearse T2 at full fatigue. This is the most race-specific session of the week.',
           segments: [
             { label: 'Bike warm-up',  minutes: 15, intensity: 'easy',     sport: 'bike' },
             { label: 'Race-pace ride', minutes: 110, intensity: 'moderate', sport: 'bike' },
@@ -588,7 +594,7 @@
           ]
         },
         'tri-sunday': {
-          description: 'An easy long run to build run volume without intensity after Saturday\'s demanding brick. Conversational pace throughout — this is aerobic base work, not a fitness test.',
+          description: 'An easy 8-mile run the day after Saturday\'s race-sim brick. Conversational pace throughout — the goal is aerobic volume and active recovery, not fitness testing.',
           segments: [
             { label: 'Easy run', minutes: 70, intensity: 'easy' }
           ]
