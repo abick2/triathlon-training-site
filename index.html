@@ -453,6 +453,215 @@
           observePanel(panel);
         });
       });
+
+      // ============================================
+      // Workout Detail Dialog
+      // ============================================
+
+      const workoutData = {
+        'run-monday': {
+          description: 'A gentle shakeout to flush out accumulated fatigue and promote blood flow. Conversational effort only — if you can\'t hold a conversation, you\'re going too hard.',
+          segments: [
+            { label: 'Easy run', minutes: 35, intensity: 'easy' }
+          ]
+        },
+        'run-tuesday': {
+          description: 'VO₂max intervals develop your top-end aerobic capacity. The 5×1K repeats at 5K pace push your oxygen uptake ceiling, separated by easy recovery jogs to let your heart rate come down before the next effort.',
+          segments: [
+            { label: 'Warm-up',    minutes: 18, intensity: 'easy' },
+            { label: '1K @ 5K',   minutes: 4,  intensity: 'hard' },
+            { label: 'Recovery',   minutes: 2,  intensity: 'recovery' },
+            { label: '1K @ 5K',   minutes: 4,  intensity: 'hard' },
+            { label: 'Recovery',   minutes: 2,  intensity: 'recovery' },
+            { label: '1K @ 5K',   minutes: 4,  intensity: 'hard' },
+            { label: 'Recovery',   minutes: 2,  intensity: 'recovery' },
+            { label: '1K @ 5K',   minutes: 4,  intensity: 'hard' },
+            { label: 'Recovery',   minutes: 2,  intensity: 'recovery' },
+            { label: '1K @ 5K',   minutes: 4,  intensity: 'hard' },
+            { label: 'Cool-down',  minutes: 18, intensity: 'easy' }
+          ]
+        },
+        'run-wednesday': {
+          description: 'A steady Zone 2 aerobic run that builds your aerobic base without accumulating fatigue. Heart rate stays controlled throughout — this trains the fat-burning engine and aids recovery.',
+          segments: [
+            { label: 'Zone 2 run', minutes: 55, intensity: 'moderate' }
+          ]
+        },
+        'run-thursday': {
+          description: 'Threshold work at half-marathon goal pace trains your body to sustain race pace comfortably. The 5-mile sustained effort raises your lactate threshold and teaches pacing discipline.',
+          segments: [
+            { label: 'Warm-up',       minutes: 14, intensity: 'easy' },
+            { label: 'HM goal pace',  minutes: 42, intensity: 'hard' },
+            { label: 'Cool-down',     minutes: 14, intensity: 'easy' }
+          ]
+        },
+        'run-friday': {
+          description: 'Full rest before the weekend training block. Use this day to sleep, eat well, hydrate, and let your body consolidate the adaptations from Tuesday and Thursday\'s harder sessions.',
+          segments: []
+        },
+        'run-saturday': {
+          description: 'A moderate aerobic run with four 20-second strides at the end. The strides activate fast-twitch fibers and improve neuromuscular efficiency — run them at mile race effort with full recovery between each.',
+          segments: [
+            { label: 'Aerobic run', minutes: 78, intensity: 'moderate' },
+            { label: 'Stride',      minutes: 1,  intensity: 'hard' },
+            { label: 'Walk',        minutes: 1,  intensity: 'recovery' },
+            { label: 'Stride',      minutes: 1,  intensity: 'hard' },
+            { label: 'Walk',        minutes: 1,  intensity: 'recovery' },
+            { label: 'Stride',      minutes: 1,  intensity: 'hard' },
+            { label: 'Walk',        minutes: 1,  intensity: 'recovery' },
+            { label: 'Stride',      minutes: 1,  intensity: 'hard' }
+          ]
+        },
+        'run-sunday': {
+          description: 'The week\'s cornerstone long run. Stay easy-to-moderate for the first 11 miles, then allow pace to drift down to marathon effort for the final 3 — teaching your legs to finish strong when fatigued.',
+          segments: [
+            { label: 'Easy–moderate', minutes: 88, intensity: 'easy' },
+            { label: 'Marathon drift', minutes: 24, intensity: 'moderate' }
+          ]
+        },
+        'tri-monday': {
+          description: 'Complete rest after the weekend\'s long efforts. Spend 15–20 minutes on light stretching or foam rolling to aid recovery, but no structured training today.',
+          segments: []
+        },
+        'tri-tuesday': {
+          description: 'A key brick session pairing a tempo bike with race-effort surges followed by an immediate transition run. The run-off-the-bike feeling is disorienting — this session trains your legs to adapt quickly.',
+          segments: [
+            { label: 'Bike warm-up',    minutes: 15, intensity: 'easy',     sport: 'bike' },
+            { label: 'Tempo ride',      minutes: 50, intensity: 'moderate', sport: 'bike' },
+            { label: '8 min race eff.', minutes: 8,  intensity: 'hard',     sport: 'bike' },
+            { label: 'Recovery ride',   minutes: 5,  intensity: 'recovery', sport: 'bike' },
+            { label: '8 min race eff.', minutes: 8,  intensity: 'hard',     sport: 'bike' },
+            { label: 'Recovery ride',   minutes: 5,  intensity: 'recovery', sport: 'bike' },
+            { label: '8 min race eff.', minutes: 8,  intensity: 'hard',     sport: 'bike' },
+            { label: 'T2 transition',   minutes: 2,  intensity: 'recovery', sport: 'run' },
+            { label: 'Transition run',  minutes: 24, intensity: 'moderate', sport: 'run' }
+          ]
+        },
+        'tri-wednesday': {
+          description: 'A continuous aerobic swim at a comfortable, sustainable pace. Focus on stroke efficiency — long, relaxed catches and smooth rotation. This builds your swim-specific aerobic base.',
+          segments: [
+            { label: 'Steady swim', minutes: 55, intensity: 'moderate', sport: 'swim' }
+          ]
+        },
+        'tri-thursday': {
+          description: 'Track-style speed work that develops run economy and top-end speed, which translates directly to faster threshold and race paces. The 90-second rests are full recovery — hit each 800m at genuine 5K effort.',
+          segments: [
+            { label: 'Warm-up',      minutes: 18, intensity: 'easy' },
+            { label: '800m @ 5K',   minutes: 3,  intensity: 'hard' },
+            { label: 'Rest',         minutes: 2,  intensity: 'recovery' },
+            { label: '800m @ 5K',   minutes: 3,  intensity: 'hard' },
+            { label: 'Rest',         minutes: 2,  intensity: 'recovery' },
+            { label: '800m @ 5K',   minutes: 3,  intensity: 'hard' },
+            { label: 'Rest',         minutes: 2,  intensity: 'recovery' },
+            { label: '800m @ 5K',   minutes: 3,  intensity: 'hard' },
+            { label: 'Rest',         minutes: 2,  intensity: 'recovery' },
+            { label: '800m @ 5K',   minutes: 3,  intensity: 'hard' },
+            { label: 'Rest',         minutes: 2,  intensity: 'recovery' },
+            { label: '800m @ 5K',   minutes: 3,  intensity: 'hard' },
+            { label: 'Cool-down',    minutes: 10, intensity: 'easy' }
+          ]
+        },
+        'tri-friday': {
+          description: 'A short swim with quality threshold intervals. The 5×220-yard sets at threshold pace build speed-endurance in the water. Threshold effort in swimming is roughly 80–85% of max heart rate.',
+          segments: [
+            { label: 'Warm-up',           minutes: 10, intensity: 'easy',     sport: 'swim' },
+            { label: '220 yd threshold',  minutes: 3,  intensity: 'hard',     sport: 'swim' },
+            { label: 'Rest',              minutes: 1,  intensity: 'recovery', sport: 'swim' },
+            { label: '220 yd threshold',  minutes: 3,  intensity: 'hard',     sport: 'swim' },
+            { label: 'Rest',              minutes: 1,  intensity: 'recovery', sport: 'swim' },
+            { label: '220 yd threshold',  minutes: 3,  intensity: 'hard',     sport: 'swim' },
+            { label: 'Rest',              minutes: 1,  intensity: 'recovery', sport: 'swim' },
+            { label: '220 yd threshold',  minutes: 3,  intensity: 'hard',     sport: 'swim' },
+            { label: 'Rest',              minutes: 1,  intensity: 'recovery', sport: 'swim' },
+            { label: '220 yd threshold',  minutes: 3,  intensity: 'hard',     sport: 'swim' },
+            { label: 'Cool-down',         minutes: 10, intensity: 'easy',     sport: 'swim' }
+          ]
+        },
+        'tri-saturday': {
+          description: 'The week\'s longest and most race-specific session. A 40-mile ride at Olympic race pace simulates the full bike leg, immediately followed by a 3-mile run off the bike to rehearse the T2 transition at tired legs.',
+          segments: [
+            { label: 'Bike warm-up',  minutes: 15, intensity: 'easy',     sport: 'bike' },
+            { label: 'Race-pace ride', minutes: 110, intensity: 'moderate', sport: 'bike' },
+            { label: 'T2 transition', minutes: 3,  intensity: 'recovery', sport: 'run' },
+            { label: 'Transition run', minutes: 24, intensity: 'moderate', sport: 'run' }
+          ]
+        },
+        'tri-sunday': {
+          description: 'An easy long run to build run volume without intensity after Saturday\'s demanding brick. Conversational pace throughout — this is aerobic base work, not a fitness test.',
+          segments: [
+            { label: 'Easy run', minutes: 70, intensity: 'easy' }
+          ]
+        }
+      };
+
+      // Dialog elements
+      const dialog = document.getElementById('workout-dialog');
+      const dialogDay = dialog.querySelector('.dialog-day');
+      const dialogDiff = dialog.querySelector('.dialog-difficulty');
+      const dialogTitle = dialog.querySelector('.dialog-title');
+      const dialogViz = dialog.querySelector('.dialog-viz');
+      const segmentBar = dialog.querySelector('.segment-bar');
+      const segmentLabels = dialog.querySelector('.segment-labels');
+      const dialogDesc = dialog.querySelector('.dialog-description');
+
+      function openWorkout(card) {
+        const key = card.dataset.workout;
+        const data = workoutData[key];
+        if (!data) return;
+
+        dialogDay.textContent = card.querySelector('.day-name').textContent;
+
+        const diffBadge = card.querySelector('.difficulty-badge');
+        dialogDiff.textContent = diffBadge.textContent;
+        dialogDiff.setAttribute('data-intensity', card.dataset.difficulty);
+
+        dialogTitle.textContent = card.querySelector('.workout-title').textContent;
+        dialogDesc.textContent = data.description;
+
+        segmentBar.innerHTML = '';
+        segmentLabels.innerHTML = '';
+
+        if (data.segments.length === 0) {
+          dialogViz.classList.add('dialog-viz--rest');
+        } else {
+          dialogViz.classList.remove('dialog-viz--rest');
+          data.segments.forEach(seg => {
+            const div = document.createElement('div');
+            div.className = 'segment segment--' + seg.intensity;
+            if (seg.sport) div.classList.add('segment--sport-' + seg.sport);
+            div.style.flexGrow = seg.minutes;
+            div.title = seg.label + ' (' + seg.minutes + ' min)';
+            segmentBar.appendChild(div);
+
+            const lbl = document.createElement('span');
+            lbl.className = 'segment-label-item';
+            lbl.style.flexGrow = seg.minutes;
+            lbl.textContent = seg.label;
+            segmentLabels.appendChild(lbl);
+          });
+        }
+
+        dialog.showModal();
+      }
+
+      // Close handlers
+      dialog.querySelector('.dialog-close').addEventListener('click', () => dialog.close());
+      dialog.addEventListener('click', (e) => {
+        if (e.target === dialog) dialog.close();
+      });
+
+      // Attach click + keyboard handlers to all workout cards
+      document.querySelectorAll('.workout-card[data-workout]').forEach(card => {
+        card.setAttribute('tabindex', '0');
+        card.setAttribute('role', 'button');
+        card.addEventListener('click', () => openWorkout(card));
+        card.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openWorkout(card);
+          }
+        });
+      });
     });
   </script>
 
