@@ -878,14 +878,8 @@ footer {
 
   .workout-dialog {
     max-width: 100%;
-    width: 100%;
-    margin: 0;
-    border-radius: var(--radius) var(--radius) 0 0;
-    position: fixed;
-    top: auto;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    width: calc(100% - 2 * var(--space-sm));
+    margin: auto;
   }
 
   .segment-bar {
