@@ -694,7 +694,17 @@ footer {
   margin-bottom: var(--space-md);
 }
 
-/* Segment visualization bar */
+/* Mileage / stat display */
+.dialog-stat {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  margin-top: -0.75rem;
+  margin-bottom: var(--space-md);
+}
+
+/* ============================================
+   Segment visualization bar */
 .segment-bar {
   display: flex;
   height: 40px;

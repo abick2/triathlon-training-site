@@ -394,6 +394,7 @@
         <button class="dialog-close" aria-label="Close">&times;</button>
       </header>
       <h2 class="dialog-title"></h2>
+      <div class="dialog-stat"></div>
       <div class="dialog-viz">
         <div class="segment-bar"></div>
         <div class="segment-labels"></div>
@@ -602,6 +603,7 @@
       const dialogViz = dialog.querySelector('.dialog-viz');
       const segmentBar = dialog.querySelector('.segment-bar');
       const segmentLabels = dialog.querySelector('.segment-labels');
+      const dialogStat = dialog.querySelector('.dialog-stat');
       const dialogDesc = dialog.querySelector('.dialog-description');
 
       function openWorkout(card) {
@@ -616,6 +618,10 @@
         dialogDiff.setAttribute('data-intensity', card.dataset.difficulty);
 
         dialogTitle.textContent = card.querySelector('.workout-title').textContent;
+
+        const footer = card.querySelector('.card-footer');
+        dialogStat.innerHTML = footer ? footer.innerHTML : '';
+
         dialogDesc.textContent = data.description;
 
         segmentBar.innerHTML = '';
