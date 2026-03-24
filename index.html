@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Week Plan — Running</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="container">
+      <div class="header-inner">
+        <h1 class="site-title">Week Plan</h1>
+        <p class="site-subtitle">Half-Marathon Build &mdash; Weekly Training</p>
+      </div>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- Hero: Overview -->
+    <section class="hero">
+      <div class="container">
+        <span class="section-label reveal-on-scroll">01 &mdash; Overview</span>
+        <div class="hero-mileage reveal-on-scroll">
+          <span class="hero-number">50</span>
+          <span class="hero-unit">miles</span>
+        </div>
+        <p class="hero-description reveal-on-scroll">
+          Seven days of structured half-marathon preparation — balancing recovery, intensity, and long-run endurance.
+        </p>
+      </div>
+    </section>
+
+    <!-- Schedule: Daily Workouts -->
+    <section class="schedule">
+      <div class="container">
+        <span class="section-label reveal-on-scroll">02 &mdash; Daily Schedule</span>
+        <div class="card-grid">
+
+          <!-- Monday -->
+          <article class="workout-card reveal-on-scroll" data-difficulty="easy">
+            <div class="card-header">
+              <span class="day-name">Monday</span>
+              <span class="difficulty-badge">Easy</span>
+            </div>
+            <h3 class="workout-title">Recovery Run</h3>
+            <p class="workout-detail">Keep it easy — conversational pace, no structure.</p>
+            <div class="card-footer">
+              <span class="mileage-number">4</span>
+              <span class="mileage-label">mi</span>
+            </div>
+          </article>
+
+          <!-- Tuesday -->
+          <article class="workout-card reveal-on-scroll" data-difficulty="hard">
+            <div class="card-header">
+              <span class="day-name">Tuesday</span>
+              <span class="difficulty-badge">Hard</span>
+            </div>
+            <h3 class="workout-title">VO&#8322;max Intervals</h3>
+            <p class="workout-detail">2 mi warm-up &middot; 5&times;1K at 5K pace &middot; 2 mi cool-down</p>
+            <div class="card-footer">
+              <span class="mileage-number">8</span>
+              <span class="mileage-label">mi</span>
+            </div>
+          </article>
+
+          <!-- Wednesday -->
+          <article class="workout-card reveal-on-scroll" data-difficulty="easy">
+            <div class="card-header">
+              <span class="day-name">Wednesday</span>
+              <span class="difficulty-badge">Easy</span>
+            </div>
+            <h3 class="workout-title">Easy Aerobic</h3>
+            <p class="workout-detail">Zone 2 effort throughout. Heart rate stays controlled.</p>
+            <div class="card-footer">
+              <span class="mileage-number">6</span>
+              <span class="mileage-label">mi</span>
+            </div>
+          </article>
+
+          <!-- Thursday -->
+          <article class="workout-card reveal-on-scroll" data-difficulty="hard">
+            <div class="card-header">
+              <span class="day-name">Thursday</span>
+              <span class="difficulty-badge">Hard</span>
+            </div>
+            <h3 class="workout-title">HM Tempo</h3>
+            <p class="workout-detail">1.5 mi warm-up &middot; 5 mi at HM goal pace &middot; 1.5 mi cool-down</p>
+            <div class="card-footer">
+              <span class="mileage-number">8</span>
+              <span class="mileage-label">mi</span>
+            </div>
+          </article>
+
+          <!-- Friday -->
+          <article class="workout-card reveal-on-scroll" data-difficulty="rest">
+            <div class="card-header">
+              <span class="day-name">Friday</span>
+              <span class="difficulty-badge">Rest</span>
+            </div>
+            <h3 class="workout-title">Rest Day</h3>
+            <p class="workout-detail">Full rest or light cross-training optional — no running.</p>
+            <div class="card-footer">
+              <span class="mileage-number" style="color: var(--color-secondary); font-size: 1.1rem;">—</span>
+            </div>
+          </article>
+
+          <!-- Saturday -->
+          <article class="workout-card reveal-on-scroll" data-difficulty="medium">
+            <div class="card-header">
+              <span class="day-name">Saturday</span>
+              <span class="difficulty-badge">Medium</span>
+            </div>
+            <h3 class="workout-title">General Aerobic + Strides</h3>
+            <p class="workout-detail">4&times;20 sec strides in the final mile of the run.</p>
+            <div class="card-footer">
+              <span class="mileage-number">10</span>
+              <span class="mileage-label">mi</span>
+            </div>
+          </article>
+
+          <!-- Sunday (featured — spans 2 columns) -->
+          <article class="workout-card card--featured reveal-on-scroll" data-difficulty="long">
+            <div class="card-header">
+              <span class="day-name">Sunday</span>
+              <span class="difficulty-badge">Long</span>
+            </div>
+            <h3 class="workout-title">Long Run</h3>
+            <p class="workout-detail">Easy&ndash;moderate effort throughout. Final 3 mi drift down to marathon pace.</p>
+            <div class="card-footer">
+              <span class="mileage-number">14</span>
+              <span class="mileage-label">mi</span>
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Summary -->
+    <section class="summary">
+      <div class="container">
+        <span class="section-label reveal-on-scroll">03 &mdash; Weekly Summary</span>
+        <div class="summary-inner">
+
+          <!-- Mileage Bar Chart -->
+          <!-- bar heights: pct = (mi / 14) * 100 -->
+          <div class="mileage-chart reveal-on-scroll">
+
+            <div class="bar-item" data-mi="4">
+              <div class="bar" style="--pct: 28.6"></div>
+              <span class="bar-day">Mon</span>
+              <span class="bar-mi">4</span>
+            </div>
+
+            <div class="bar-item" data-mi="8">
+              <div class="bar" style="--pct: 57.1"></div>
+              <span class="bar-day">Tue</span>
+              <span class="bar-mi">8</span>
+            </div>
+
+            <div class="bar-item" data-mi="6">
+              <div class="bar" style="--pct: 42.9"></div>
+              <span class="bar-day">Wed</span>
+              <span class="bar-mi">6</span>
+            </div>
+
+            <div class="bar-item" data-mi="8">
+              <div class="bar" style="--pct: 57.1"></div>
+              <span class="bar-day">Thu</span>
+              <span class="bar-mi">8</span>
+            </div>
+
+            <div class="bar-item" data-mi="0">
+              <div class="bar" style="--pct: 0"></div>
+              <span class="bar-day">Fri</span>
+              <span class="bar-mi">—</span>
+            </div>
+
+            <div class="bar-item" data-mi="10">
+              <div class="bar" style="--pct: 71.4"></div>
+              <span class="bar-day">Sat</span>
+              <span class="bar-mi">10</span>
+            </div>
+
+            <div class="bar-item" data-mi="14">
+              <div class="bar" style="--pct: 100"></div>
+              <span class="bar-day">Sun</span>
+              <span class="bar-mi">14</span>
+            </div>
+
+          </div>
+
+          <!-- Total -->
+          <div class="summary-total reveal-on-scroll">
+            <span class="total-number">50</span>
+            <span class="total-label">total miles</span>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <p class="footer-text">&copy; 2026 &mdash; Weekly Training Log</p>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('revealed');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.1 });
+
+      document.querySelectorAll('.reveal-on-scroll').forEach(el => {
+        observer.observe(el);
+      });
+    });
+  </script>
+
+</body>
+</html>
