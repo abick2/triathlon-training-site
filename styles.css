@@ -374,6 +374,182 @@ header {
 }
 
 /* ============================================
+   Tab Navigation
+   ============================================ */
+.tab-nav {
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.tab-list {
+  display: flex;
+  gap: 0;
+}
+
+.tab-btn {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-secondary);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+  transition: color var(--transition), border-color var(--transition);
+  margin-bottom: -1px;
+}
+
+.tab-btn:hover {
+  color: var(--color-dark);
+}
+
+.tab-btn--active {
+  color: var(--color-dark);
+  border-bottom-color: var(--color-dark);
+}
+
+/* Tab Panels */
+.tab-panel {
+  display: none;
+}
+
+.tab-panel--active {
+  display: block;
+}
+
+/* ============================================
+   Tri Hero Stats
+   ============================================ */
+.hero-tri-stats {
+  display: flex;
+  align-items: baseline;
+  gap: 2rem;
+  margin-bottom: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.tri-stat {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+
+.tri-stat-number {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: clamp(3rem, 7vw, 6rem);
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.tri-stat-unit {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: clamp(1rem, 2vw, 1.6rem);
+  color: var(--color-secondary);
+}
+
+.tri-stat-divider {
+  width: 1px;
+  height: 3rem;
+  background: var(--color-border);
+  align-self: center;
+}
+
+/* ============================================
+   Sport Badges
+   ============================================ */
+.sport-badge {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-pill);
+  margin-right: 0.4rem;
+}
+
+.sport-badge--swim {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.sport-badge--bike {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.sport-badge--run {
+  background: #fce7f3;
+  color: #9d174d;
+}
+
+.sport-badge--rest {
+  background: transparent;
+  border: 1px dashed var(--color-border-light);
+  color: var(--color-secondary);
+}
+
+/* ============================================
+   Tri Summary
+   ============================================ */
+.tri-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 520px;
+}
+
+.tri-summary-sport {
+  display: grid;
+  grid-template-columns: 3rem 1fr 5rem;
+  align-items: center;
+  gap: 1rem;
+}
+
+.tri-summary-label {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-secondary);
+}
+
+.tri-summary-bar-track {
+  height: 6px;
+  background: var(--color-border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.tri-summary-bar {
+  height: 100%;
+  border-radius: 3px;
+  width: calc(var(--tri-pct) * 1%);
+  transition: width 1s ease;
+}
+
+.tri-summary-bar--swim { background: #3b82f6; }
+.tri-summary-bar--bike { background: #10b981; }
+.tri-summary-bar--run { background: #ec4899; }
+
+.tri-summary-value {
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 0.85rem;
+  color: var(--color-dark);
+  text-align: right;
+}
+
+/* ============================================
    Footer
    ============================================ */
 footer {
@@ -471,5 +647,17 @@ footer {
 
   .mileage-chart {
     gap: 0.4rem;
+  }
+
+  .hero-tri-stats {
+    gap: 1.25rem;
+  }
+
+  .tri-stat-divider {
+    height: 2rem;
+  }
+
+  .tri-summary-sport {
+    grid-template-columns: 3rem 1fr 4.5rem;
   }
 }
