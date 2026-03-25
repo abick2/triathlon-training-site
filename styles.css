@@ -26,6 +26,10 @@
   --max-width: 1200px;
   --transition: 0.3s ease;
 
+  --color-sport-swim: #3b82f6;
+  --color-sport-bike: #10b981;
+  --color-sport-run:  #ec4899;
+
   --color-phase-base: #d4d4d4;
   --color-phase-build: #888888;
   --color-phase-peak: #1a1a1a;
@@ -553,9 +557,9 @@ header {
   transition: width 1s ease;
 }
 
-.tri-summary-bar--swim { background: #3b82f6; }
-.tri-summary-bar--bike { background: #10b981; }
-.tri-summary-bar--run { background: #ec4899; }
+.tri-summary-bar--swim { background: var(--color-sport-swim); }
+.tri-summary-bar--bike { background: var(--color-sport-bike); }
+.tri-summary-bar--run  { background: var(--color-sport-run);  }
 
 .tri-summary-value {
   font-family: var(--font-body);
@@ -942,9 +946,9 @@ footer {
 .legend-swatch--build { background: var(--color-phase-build); }
 .legend-swatch--peak  { background: var(--color-phase-peak); }
 .legend-swatch--taper { background: var(--color-phase-taper); }
-.legend-swatch--swim  { background: #3b82f6; }
-.legend-swatch--bike  { background: #10b981; }
-.legend-swatch--run   { background: #ec4899; }
+.legend-swatch--swim  { background: var(--color-sport-swim); }
+.legend-swatch--bike  { background: var(--color-sport-bike); }
+.legend-swatch--run   { background: var(--color-sport-run);  }
 
 /* Tri stacked bars */
 .prog-bar-stack {
@@ -962,9 +966,9 @@ footer {
   width: 100%;
 }
 
-.prog-seg--swim { background: #3b82f6; flex-grow: var(--seg-pct); }
-.prog-seg--bike { background: #10b981; flex-grow: var(--seg-pct); }
-.prog-seg--run  { background: #ec4899; flex-grow: var(--seg-pct); }
+.prog-seg--swim { background: var(--color-sport-swim); flex-grow: var(--seg-pct); }
+.prog-seg--bike { background: var(--color-sport-bike); flex-grow: var(--seg-pct); }
+.prog-seg--run  { background: var(--color-sport-run);  flex-grow: var(--seg-pct); }
 
 .prog-week--current .prog-bar-stack {
   outline: 2px solid var(--color-dark);

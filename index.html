@@ -506,9 +506,7 @@
         });
       });
 
-      // ============================================
-      // Workout Detail Dialog
-      // ============================================
+
 
       const workoutData = {
         'run-monday': {
@@ -720,9 +718,7 @@
         });
       });
 
-      // ============================================
-      // Training Plan Progression Data
-      // ============================================
+      // Training plan progression data
       const runPlan = {
         raceDate: 'May 3, 2026',
         raceName: 'Half-Marathon',
@@ -771,20 +767,31 @@
         ]
       };
 
-      function renderProgression(plan, chartId, phasesId, dateLabelId, isTri) {
-        const chart = document.getElementById(chartId);
-        const phases = document.getElementById(phasesId);
-        const dateLabel = document.getElementById(dateLabelId);
+      const phaseNames = {
+        'base':    'Base',
+        'build-1': 'Build I',
+        'build-2': 'Build II',
+        'peak':    'Peak',
+        'taper':   'Taper'
+      };
+
+      function renderProgression(plan, tabPrefix, isTri) {
+        const chart     = document.getElementById(tabPrefix + '-progression-chart');
+        const phases    = document.getElementById(tabPrefix + '-progression-phases');
+        const dateLabel = document.getElementById(tabPrefix + '-race-date');
 
         dateLabel.textContent = plan.raceDate;
 
-        const maxTotal = Math.max(...plan.weeks.map(w => {
-          if (isTri) return w.bike + w.run + Math.round(w.swim / 1760);
-          return w.miles;
-        }));
+        // Pre-compute totals once to avoid redundant swim conversion per week
+        const weekTotals = plan.weeks.map(w => {
+          if (!isTri) return { total: w.miles };
+          const swimMi = Math.round(w.swim / 1760);
+          return { total: w.bike + w.run + swimMi, swimMi };
+        });
+        const maxTotal = Math.max(...weekTotals.map(t => t.total));
 
-        plan.weeks.forEach(w => {
-          const total = isTri ? w.bike + w.run + Math.round(w.swim / 1760) : w.miles;
+        plan.weeks.forEach((w, i) => {
+          const { total, swimMi } = weekTotals[i];
           const pct = (total / maxTotal) * 100;
 
           const div = document.createElement('div');
@@ -793,13 +800,12 @@
           if (w.week > plan.currentWeek)   div.classList.add('prog-week--future');
 
           if (isTri) {
-            const swimMi = Math.round(w.swim / 1760);
             div.style.setProperty('--prog-total', pct);
             div.innerHTML =
               '<div class="prog-bar-stack">' +
-                '<div class="prog-seg prog-seg--run"  style="--seg-pct: ' + w.run   + '"></div>' +
-                '<div class="prog-seg prog-seg--bike" style="--seg-pct: ' + w.bike  + '"></div>' +
-                '<div class="prog-seg prog-seg--swim" style="--seg-pct: ' + swimMi  + '"></div>' +
+                '<div class="prog-seg prog-seg--run"  style="--seg-pct: ' + w.run  + '"></div>' +
+                '<div class="prog-seg prog-seg--bike" style="--seg-pct: ' + w.bike + '"></div>' +
+                '<div class="prog-seg prog-seg--swim" style="--seg-pct: ' + swimMi + '"></div>' +
               '</div>' +
               '<span class="prog-value">' + total + ' mi</span>' +
               '<span class="prog-label">Wk ' + w.week + '</span>';
@@ -807,14 +813,13 @@
             div.style.setProperty('--prog-pct', pct);
             div.innerHTML =
               '<div class="prog-bar"></div>' +
-              '<span class="prog-value">' + w.miles + ' mi</span>' +
+              '<span class="prog-value">' + total + ' mi</span>' +
               '<span class="prog-label">Wk ' + w.week + '</span>';
           }
 
           chart.appendChild(div);
         });
 
-        // Build proportional phase span labels
         const phaseGroups = [];
         let cur = null;
         plan.weeks.forEach(w => {
@@ -826,14 +831,6 @@
           }
         });
 
-        const phaseNames = {
-          'base':    'Base',
-          'build-1': 'Build I',
-          'build-2': 'Build II',
-          'peak':    'Peak',
-          'taper':   'Taper'
-        };
-
         phaseGroups.forEach(g => {
           const span = document.createElement('span');
           span.className = 'phase-span';
@@ -843,8 +840,8 @@
         });
       }
 
-      renderProgression(runPlan, 'run-progression-chart', 'run-progression-phases', 'run-race-date', false);
-      renderProgression(triPlan, 'tri-progression-chart', 'tri-progression-phases', 'tri-race-date', true);
+      renderProgression(runPlan, 'run', false);
+      renderProgression(triPlan, 'tri', true);
     });
   </script>
 
