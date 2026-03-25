@@ -27,6 +27,7 @@
       <div class="tab-list">
         <button class="tab-btn tab-btn--active" data-tab="run">Run</button>
         <button class="tab-btn" data-tab="tri">Tri</button>
+        <button class="tab-btn" data-tab="chat">Chat</button>
       </div>
     </div>
   </nav>
@@ -454,6 +455,46 @@
     </div>
   </dialog>
 
+  <!-- ===================== CHAT TAB ===================== -->
+  <div id="tab-chat" class="tab-panel">
+    <div class="chat-container">
+
+      <div class="chat-header">
+        <h2 class="chat-title">Coach</h2>
+        <p class="chat-subtitle">Ask about your training plan, request schedule changes, or get workout guidance.</p>
+      </div>
+
+      <div class="chat-messages" id="chat-messages" aria-live="polite" aria-label="Chat conversation">
+        <div class="chat-message chat-message--assistant">
+          <div class="chat-bubble">
+            Hi Andrew. I'm your triathlon coach. I can help you adjust your training schedule, answer questions about your workouts, or explain the rationale behind the plan. What's on your mind?
+          </div>
+        </div>
+      </div>
+
+      <form class="chat-input-area" id="chat-form" novalidate>
+        <div class="chat-input-row">
+          <textarea
+            class="chat-input"
+            id="chat-input"
+            placeholder="Ask about your training plan..."
+            rows="1"
+            maxlength="2000"
+            aria-label="Message to coach"
+          ></textarea>
+          <button type="submit" class="chat-send-btn" id="chat-send" aria-label="Send message">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          </button>
+        </div>
+        <p class="chat-hint">Shift+Enter for new line &nbsp;&middot;&nbsp; Enter to send</p>
+      </form>
+
+    </div>
+  </div>
+
   <!-- Footer -->
   <footer>
     <div class="container">
@@ -486,7 +527,8 @@
       // Tab switching
       const subtitles = {
         run: 'Half-Marathon Build \u2014 Weekly Training',
-        tri: 'Olympic Distance \u2014 Weekly Training'
+        tri: 'Olympic Distance \u2014 Weekly Training',
+        chat: 'Coach \u2014 Training Plan Assistant'
       };
 
       document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -842,6 +884,169 @@
 
       renderProgression(runPlan, 'run', false);
       renderProgression(triPlan, 'tri', true);
+
+      // ── Chat Tab ─────────────────────────────────────────────────────────────
+
+      const chatForm    = document.getElementById('chat-form');
+      const chatInput   = document.getElementById('chat-input');
+      const chatMessages = document.getElementById('chat-messages');
+      const chatSend    = document.getElementById('chat-send');
+
+      // Conversation history sent to /api/chat on each request
+      const conversationHistory = [];
+
+      // Auto-grow textarea
+      chatInput.addEventListener('input', () => {
+        chatInput.style.height = 'auto';
+        chatInput.style.height = Math.min(chatInput.scrollHeight, 160) + 'px';
+      });
+
+      // Send on Enter, new line on Shift+Enter
+      chatInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          chatForm.requestSubmit();
+        }
+      });
+
+      function appendMessage(role, content, isStreaming = false) {
+        const wrapper = document.createElement('div');
+        wrapper.className = `chat-message chat-message--${role}`;
+
+        const bubble = document.createElement('div');
+        bubble.className = 'chat-bubble';
+        if (isStreaming) bubble.classList.add('chat-bubble--streaming');
+        bubble.textContent = content;
+
+        wrapper.appendChild(bubble);
+        chatMessages.appendChild(wrapper);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        return bubble;
+      }
+
+      function appendStatusPill(text) {
+        const pill = document.createElement('div');
+        pill.className = 'chat-status-pill';
+        pill.textContent = text;
+        chatMessages.appendChild(pill);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        return pill;
+      }
+
+      function setInputDisabled(disabled) {
+        chatInput.disabled = disabled;
+        chatSend.disabled = disabled;
+        chatSend.classList.toggle('chat-send-btn--loading', disabled);
+      }
+
+      chatForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const text = chatInput.value.trim();
+        if (!text) return;
+
+        // Append user message to UI and history
+        appendMessage('user', text);
+        conversationHistory.push({ role: 'user', content: text });
+
+        // Clear input
+        chatInput.value = '';
+        chatInput.style.height = 'auto';
+        setInputDisabled(true);
+
+        // Create a streaming assistant bubble
+        const assistantBubble = appendMessage('assistant', '', true);
+        let fullResponse = '';
+
+        // Active status pill (removed once the text response starts)
+        let statusPill = appendStatusPill('Thinking…');
+        let statusShown = true;
+
+        try {
+          const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ messages: conversationHistory }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`Server error: ${response.status}`);
+          }
+
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let buffer = '';
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+
+            // Process complete SSE events (separated by \n\n)
+            const events = buffer.split('\n\n');
+            buffer = events.pop(); // keep the incomplete last chunk
+
+            for (const event of events) {
+              if (!event.startsWith('data: ')) continue;
+              let parsed;
+              try {
+                parsed = JSON.parse(event.replace('data: ', ''));
+              } catch {
+                continue;
+              }
+
+              switch (parsed.type) {
+                case 'delta':
+                  if (statusShown) {
+                    statusPill.remove();
+                    statusShown = false;
+                  }
+                  fullResponse += parsed.text;
+                  assistantBubble.textContent = fullResponse;
+                  assistantBubble.classList.remove('chat-bubble--streaming');
+                  chatMessages.scrollTop = chatMessages.scrollHeight;
+                  break;
+
+                case 'tool_use':
+                  if (statusShown) statusPill.textContent = `Using tool: ${parsed.name}…`;
+                  else statusPill = appendStatusPill(`Using tool: ${parsed.name}…`), statusShown = true;
+                  break;
+
+                case 'tool_result':
+                  if (statusShown) {
+                    statusPill.textContent = parsed.success
+                      ? `Applied: ${parsed.name}`
+                      : `Tool error: ${parsed.name}`;
+                  }
+                  break;
+
+                case 'done':
+                  if (statusShown) { statusPill.remove(); statusShown = false; }
+                  break;
+
+                case 'error':
+                  if (statusShown) { statusPill.remove(); statusShown = false; }
+                  assistantBubble.textContent = `Error: ${parsed.message}`;
+                  assistantBubble.classList.add('chat-bubble--error');
+                  break;
+              }
+            }
+          }
+        } catch (err) {
+          if (statusShown) { statusPill.remove(); statusShown = false; }
+          assistantBubble.textContent = `Connection error: ${err.message}`;
+          assistantBubble.classList.add('chat-bubble--error');
+        } finally {
+          setInputDisabled(false);
+          chatInput.focus();
+          // Add assistant reply to history (only if we got content)
+          if (fullResponse) {
+            conversationHistory.push({ role: 'assistant', content: fullResponse });
+          }
+        }
+      });
+
     });
   </script>
 
