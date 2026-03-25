@@ -35,7 +35,7 @@
   --color-phase-peak: #1a1a1a;
   --color-phase-taper: #aaaaaa;
 
-  --bar-scale: 1.4px;   /* max bar ≈ 140px; fits in 180px chart w/ ~40px labels */
+  --bar-scale: 1.3px;   /* max bar ≈ 130px; fits in 166px content (180px - 6px top - 8px bottom padding) */
 }
 
 /* ============================================
@@ -821,6 +821,7 @@ footer {
   align-items: flex-end;
   gap: 0.375rem;
   height: 180px;
+  padding-top: 6px;     /* room for the current-week outline above the tallest bar */
   padding-bottom: var(--space-xs);
   margin-bottom: var(--space-xs);
   overflow-x: auto;
@@ -1018,7 +1019,7 @@ footer {
   }
 
   :root {
-    --bar-scale: 0.94px;  /* max bar ≈ 94px; fits in 140px chart w/ ~46px labels */
+    --bar-scale: 0.90px;  /* max bar ≈ 90px; fits in 126px content (140px - 6px top - 8px bottom) */
   }
 }
 
