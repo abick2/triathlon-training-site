@@ -375,14 +375,19 @@ export async function executeTool(
  * Builds the system prompt array with prompt caching.
  * The coach profile is the stable, expensive-to-process block — cache it.
  */
-export function buildSystemPrompt(): Anthropic.Beta.PromptCaching.PromptCachingBetaTextBlockParam[] {
+export function buildSystemPrompt(): Anthropic.Beta.BetaTextBlockParam[] {
   const profile = loadCoachProfile();
+  const today = new Date().toISOString().split('T')[0];
 
   return [
     {
       type: 'text',
       text: profile,
       cache_control: { type: 'ephemeral' },
+    },
+    {
+      type: 'text',
+      text: `Today's date is ${today}.`,
     },
   ];
 }

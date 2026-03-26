@@ -97,7 +97,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     while (toolRound <= MAX_TOOL_ROUNDS) {
       // Stream the response
-      const stream = anthropic.beta.promptCaching.messages.stream({
+      const stream = anthropic.beta.messages.stream({
         model: MODEL,
         max_tokens: MAX_TOKENS,
         system: systemPrompt,
