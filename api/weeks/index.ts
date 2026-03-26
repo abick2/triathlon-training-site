@@ -3,6 +3,13 @@
  * Returns all training weeks with their nested workouts, ordered by week_number.
  */
 
+process.on('unhandledRejection', (reason) => {
+  console.error('UNHANDLED REJECTION:', reason);
+});
+process.on('uncaughtException', (err) => {
+  console.error('UNCAUGHT EXCEPTION:', err);
+});
+
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getSupabaseClient } from '../../lib/supabase.js';
 import type { WeekWithWorkouts } from '../../types/index.js';
