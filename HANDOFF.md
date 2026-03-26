@@ -1,81 +1,183 @@
-# Handoff: Training Plan Progression Section
+# Handoff: Dynamic Backend — feature/dynamic-backend
 
-## What was built
+## Current state
 
-A new **04 — Training Plan Progression** section added to both the Run and Tri tabs, sitting below the existing weekly summary. It shows the full 16-week training arc at a glance: weekly mileage as a bar chart, colored by phase, with the current week highlighted and the race date in the heading.
+- **Branch:** `feature/dynamic-backend`
+- **Commit:** all work committed (28 files, 8521 insertions)
+- **Tests:** 124 passing, 7 skipped (DB integration tests — skipped until `SUPABASE_TEST_URL` is configured)
+- **Status:** Code complete. Needs Supabase + Vercel setup before it will run.
 
 ---
 
-## Files changed
+## What was built
+
+### New files
+
+| File | Purpose |
+|---|---|
+| `package.json` | npm project: Anthropic SDK, Supabase client, Vitest, TypeScript, @vercel/node |
+| `tsconfig.json` | TypeScript config for all API/lib/test code |
+| `vercel.json` | Vercel config — `/api/chat` gets `maxDuration: 60` for streaming |
+| `.gitignore` | Ignores node_modules, dist, .env.local, .vercel, coverage |
+| `.env.example` | Template for required env vars |
+| `vitest.config.ts` | Test runner config |
+| `types/index.ts` | Shared TypeScript types: `Workout`, `TrainingWeek`, `WeekWithWorkouts`, `CoachMemory`, request bodies, tool names |
+| `lib/supabase.ts` | Supabase client singleton + `createTestClient()` factory for tests |
+| `lib/anthropic.ts` | Anthropic client, 8 coach tool definitions, `executeTool()`, `buildSystemPrompt()` with prompt caching |
+| `coach-profile.md` | The coach's "brain" — athlete profile, swim preferences, coaching philosophy, pushback rules. Loaded and cached as the system prompt. |
+| `api/weeks/index.ts` | `GET /api/weeks` — all training weeks with nested workouts |
+| `api/workouts/index.ts` | `GET /api/workouts` + `POST /api/workouts` |
+| `api/workouts/[id].ts` | `GET/PUT/DELETE /api/workouts/:id` |
+| `api/chat.ts` | `POST /api/chat` — SSE streaming chat with tool-use agentic loop |
+| `supabase/migrations/001_initial_schema.sql` | Schema: `training_weeks`, `workouts`, `coach_memory` tables with constraints and indexes |
+| `supabase/seed.ts` | `npm run seed` — populates 15 weeks of filler training data (race May 3 2026) |
+| `tests/setup.ts` | Global test setup (stub env vars) |
+| `tests/fixtures/index.ts` | Shared test fixtures |
+| `tests/types.test.ts` | Type + enum conformance tests |
+| `tests/lib/supabase.test.ts` | Unit + integration tests for Supabase client |
+| `tests/lib/anthropic.test.ts` | Tool schema validation, tool execution, prompt caching, coach profile content |
+| `tests/api/weeks.test.ts` | Route tests for `/api/weeks` |
+| `tests/api/workouts.test.ts` | Route tests for `/api/workouts` — validation, happy path, error cases |
+| `tests/api/chat.test.ts` | Chat endpoint tests — SSE headers, streaming, tool round-trips, error handling |
+
+### Modified files
 
 | File | What changed |
-|------|-------------|
-| `index.html` | Added progression section HTML to Run + Tri tabs; added `runPlan` / `triPlan` data objects and `renderProgression()` JS function |
-| `styles.css` | Added `--color-sport-*` and `--color-phase-*` custom properties; added all progression section CSS including responsive overrides |
-| `tests/progression.test.html` | Browser-runnable test suite (open in browser to run) |
+|---|---|
+| `index.html` | Added "Chat" tab button; added `#tab-chat` panel with chat UI (messages, input, send button); updated subtitle dict; added full SSE streaming JS client |
+| `styles.css` | Added Chat tab styles: `.chat-container`, `.chat-messages`, `.chat-bubble`, `.chat-status-pill`, `.chat-input-area`, animations, responsive overrides |
+| `CLAUDE.md` | Fully updated to reflect the new stack, architecture, file structure, deployment steps, and design decisions |
+
+---
+
+## Setup steps (required before the app will run)
+
+### 1. Supabase
+
+1. Create a project at [supabase.com](https://supabase.com)
+2. Go to **SQL Editor** and run the full contents of `supabase/migrations/001_initial_schema.sql`
+3. Get your project URL and anon key from **Project Settings → API**
+
+### 2. Local environment
+
+Create `.env.local` in the project root (copy from `.env.example`):
+
+```
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your-anon-key
+ANTHROPIC_API_KEY=sk-ant-...
+```
+
+Then seed filler data:
+
+```bash
+npm install
+npm run seed
+```
+
+### 3. Vercel
+
+```bash
+npm i -g vercel
+vercel link          # link this directory to a Vercel project
+```
+
+Add env vars in the **Vercel dashboard** (Project → Settings → Environment Variables) — same three vars as above.
+
+### 4. Deploy
+
+```bash
+vercel --prod
+```
+
+### 5. Local dev
+
+```bash
+vercel dev    # runs frontend + API routes on localhost:3000
+```
 
 ---
 
 ## Architecture
 
-### Data (`index.html`, inside `DOMContentLoaded`)
-
-```js
-const runPlan = { raceDate, raceName, currentWeek, weeks: [{ week, miles, phase }] }
-const triPlan = { raceDate, raceName, currentWeek, weeks: [{ week, swim, bike, run, phase }] }
 ```
+Browser (index.html / styles.css)
+  ├── Run tab, Tri tab  — existing static content (unchanged)
+  └── Chat tab          — SSE streaming UI → fetch('/api/chat')
 
-Both plans are 16 weeks. `currentWeek: 14` matches the weekly data displayed in sections 01–03.
+Vercel Serverless Functions (TypeScript)
+  ├── /api/chat          — streams Claude responses, executes tools
+  ├── /api/workouts      — CRUD for individual workouts
+  ├── /api/workouts/:id  — single workout CRUD
+  └── /api/weeks         — all weeks with nested workouts
 
-### Rendering
+Supabase (PostgreSQL)
+  ├── training_weeks     — week_number, dates, theme, notes
+  ├── workouts           — linked to weeks, sport/title/description/intensity/etc.
+  └── coach_memory       — key-value store for dynamic coach notes
 
-```js
-renderProgression(plan, tabPrefix, isTri)
-// tabPrefix = 'run' or 'tri'
-// Looks up: #{tabPrefix}-progression-chart, #{tabPrefix}-progression-phases, #{tabPrefix}-race-date
+Anthropic API
+  └── Claude (claude-sonnet-4-6) via streaming + tool use + prompt caching
 ```
-
-The function:
-1. Pre-computes week totals once (avoids redundant swim yd→mi conversion)
-2. Builds `.prog-week` bar elements with phase class + current/future modifiers
-3. Tri tab: stacked `.prog-bar-stack` with swim/bike/run segments sized by `flex-grow`
-4. Builds proportional `.phase-span` labels below the chart using `flex: N` (N = weeks in phase)
-
-### CSS key points
-
-- **Bar height**: `height: calc(var(--prog-pct) * var(--bar-scale))` — scale is responsive:
-  - Desktop (180px chart): `1.3px`
-  - 900px (140px chart): `0.90px`
-  - 600px (120px chart): `0.72px`
-- **`padding-top: 6px`** on `.progression-chart` — required because `overflow-x: auto` forces `overflow-y: auto` per CSS spec, which would clip the current-week outline. The padding gives the 4px outline+offset room to render.
-- **Sport colors** — defined once as `--color-sport-swim/bike/run` in `:root`, used by `.tri-summary-bar--*`, `.prog-seg--*`, and `.legend-swatch--*`
-- **Phase colors** — `--color-phase-base/build/peak/taper` in `:root`
 
 ---
 
-## Updating the plan data
+## Coach system
 
-To change the race date or mileage, edit the `runPlan` / `triPlan` objects in `index.html` (~line 726). The rendering is fully dynamic — no HTML changes needed.
+### coach-profile.md
 
-To change which week is "current", update `currentWeek` in both plan objects.
+This file is the "CLAUDE.md" for the AI coach. It's read at startup and cached as the system prompt. Edit it to change:
+- Athlete profile and PRs
+- Swim workout requirements (fully scripted — no simple interval style)
+- Coaching philosophy (pushback rules, acceptable vs. pushback-required changes)
+- Race date and target
+
+### 8 coach tools
+
+Defined in `lib/anthropic.ts` → `COACH_TOOLS`, executed by `executeTool()`:
+
+| Tool | Purpose |
+|---|---|
+| `get_week` | Fetch a training week by number (with workouts) |
+| `get_workouts` | Fetch workouts with optional week_id/date range filter |
+| `get_workout` | Fetch a single workout by UUID |
+| `update_workout` | Update any fields on a workout |
+| `swap_workout_days` | Swap dates/days between two workouts (for rest day moves) |
+| `add_workout_note` | Append a note to a workout's notes field |
+| `get_coach_memory` | Read a key from the coach_memory table |
+| `update_coach_memory` | Write/update a key in coach_memory |
+
+### Prompt caching
+
+`buildSystemPrompt()` wraps `coach-profile.md` in `cache_control: { type: 'ephemeral' }`. Anthropic caches this for ~5 minutes — cuts input token costs significantly on follow-up messages within a session.
 
 ---
 
-## Tests
+## Key design decisions
 
-Open `tests/progression.test.html` in a browser (via a local server, not `file://`):
+- **Streaming**: `/api/chat` uses Server-Sent Events (SSE). The browser reads `data: {...}\n\n` chunks. Text deltas stream into the bubble character by character. Tool calls show a "Thinking…" / "Using tool: …" status pill.
+- **Tool-use loop**: The chat handler loops up to 5 rounds. Claude calls tools → we execute them → results fed back → Claude continues. Guards against infinite loops.
+- **maxDuration: 60**: Set in `vercel.json` for `/api/chat`. Streaming responses from Claude are typically 5–20 seconds, well within the 60s limit on Vercel hobby tier.
+- **Input validation**: All API routes validate inputs before hitting Supabase. Invalid enum values, missing required fields, malformed dates, and negative durations all return 400 with a descriptive message.
+
+---
+
+## Next features to build
+
+1. **Wire Run/Tri tab data to the DB** — currently the Run and Tri tab workout cards are still hardcoded in `index.html`. The ideal next step is to fetch from `/api/weeks` and render dynamically, so the coach can actually modify what's shown.
+
+2. **Build the real 15-week plan** — use the Chat coach to generate and refine Andrew's actual half-iron training plan leading to May 3. The filler seed data is a placeholder.
+
+3. **Workout detail modal** — clicking a workout card opens a modal with the full description (sets, drills, pacing). The `description` field in the DB already holds rich text for swim workouts.
+
+4. **Integration test DB** — set `SUPABASE_TEST_URL` + `SUPABASE_TEST_ANON_KEY` in `.env.local` to unlock the 7 skipped integration tests that verify schema constraints and cascade deletes against a real DB.
+
+---
+
+## Running tests
 
 ```bash
-python3 -m http.server 8000
-# then open http://localhost:8000/tests/progression.test.html
+npm test              # all unit tests (no DB needed)
+npm run test:watch    # watch mode
+npm run test:coverage # coverage report → coverage/
 ```
-
-Covers: data integrity, DOM rendering (element counts, current/future classes, stacked bar segments, phase flex totals), and layout at 375px. Manual mobile checklist is at the bottom of the test page.
-
----
-
-## Known decisions
-
-- **Swim yards → equivalent miles**: `Math.round(swim / 1760)`. Used only for bar height and total label — the swim segment's `flex-grow` uses the raw mile equivalent so it visually proportional to bike/run miles.
-- **Tri bar height** uses `--prog-total` (combined equivalent miles), not `--prog-pct`, to keep the CSS variable names distinct between the two bar types.
-- **Phase label alignment**: `.phase-span` uses `flex: N` where N = number of weeks in that phase — this keeps labels proportionally aligned with the bars above without any JS measurement.
