@@ -42,11 +42,11 @@
         <div class="container">
           <span class="section-label reveal-on-scroll">01 &mdash; Overview</span>
           <div class="hero-mileage reveal-on-scroll">
-            <span class="hero-number">50</span>
+            <span class="hero-number" id="run-hero-number">&mdash;</span>
             <span class="hero-unit">miles</span>
           </div>
-          <p class="hero-description reveal-on-scroll">
-            Seven days of structured half-marathon preparation — balancing recovery, intensity, and long-run endurance.
+          <p class="hero-description reveal-on-scroll" id="run-hero-description">
+            Loading this week&rsquo;s training plan&hellip;
           </p>
         </div>
       </section>
@@ -55,105 +55,8 @@
       <section class="schedule">
         <div class="container">
           <span class="section-label reveal-on-scroll">02 &mdash; Daily Schedule</span>
-          <div class="card-grid">
-
-            <!-- Monday -->
-            <article class="workout-card reveal-on-scroll" data-difficulty="easy" data-workout="run-monday">
-              <div class="card-header">
-                <span class="day-name">Monday</span>
-                <span class="difficulty-badge">Easy</span>
-              </div>
-              <h3 class="workout-title">Recovery Run</h3>
-              <p class="workout-detail">Keep it easy — conversational pace, no structure.</p>
-              <div class="card-footer">
-                <span class="mileage-number">4</span>
-                <span class="mileage-label">mi</span>
-              </div>
-            </article>
-
-            <!-- Tuesday -->
-            <article class="workout-card reveal-on-scroll" data-difficulty="hard" data-workout="run-tuesday">
-              <div class="card-header">
-                <span class="day-name">Tuesday</span>
-                <span class="difficulty-badge">Hard</span>
-              </div>
-              <h3 class="workout-title">VO&#8322;max Intervals</h3>
-              <p class="workout-detail">2 mi warm-up &middot; 5&times;1K at 5K pace &middot; 2 mi cool-down</p>
-              <div class="card-footer">
-                <span class="mileage-number">8</span>
-                <span class="mileage-label">mi</span>
-              </div>
-            </article>
-
-            <!-- Wednesday -->
-            <article class="workout-card reveal-on-scroll" data-difficulty="easy" data-workout="run-wednesday">
-              <div class="card-header">
-                <span class="day-name">Wednesday</span>
-                <span class="difficulty-badge">Easy</span>
-              </div>
-              <h3 class="workout-title">Easy Aerobic</h3>
-              <p class="workout-detail">Zone 2 effort throughout. Heart rate stays controlled.</p>
-              <div class="card-footer">
-                <span class="mileage-number">6</span>
-                <span class="mileage-label">mi</span>
-              </div>
-            </article>
-
-            <!-- Thursday -->
-            <article class="workout-card reveal-on-scroll" data-difficulty="hard" data-workout="run-thursday">
-              <div class="card-header">
-                <span class="day-name">Thursday</span>
-                <span class="difficulty-badge">Hard</span>
-              </div>
-              <h3 class="workout-title">HM Tempo</h3>
-              <p class="workout-detail">1.5 mi warm-up &middot; 5 mi at HM goal pace &middot; 1.5 mi cool-down</p>
-              <div class="card-footer">
-                <span class="mileage-number">8</span>
-                <span class="mileage-label">mi</span>
-              </div>
-            </article>
-
-            <!-- Friday -->
-            <article class="workout-card reveal-on-scroll" data-difficulty="rest" data-workout="run-friday">
-              <div class="card-header">
-                <span class="day-name">Friday</span>
-                <span class="difficulty-badge">Rest</span>
-              </div>
-              <h3 class="workout-title">Rest Day</h3>
-              <p class="workout-detail">Full rest or light cross-training optional — no running.</p>
-              <div class="card-footer">
-                <span class="mileage-number" style="color: var(--color-secondary); font-size: 1.1rem;">—</span>
-              </div>
-            </article>
-
-            <!-- Saturday -->
-            <article class="workout-card reveal-on-scroll" data-difficulty="medium" data-workout="run-saturday">
-              <div class="card-header">
-                <span class="day-name">Saturday</span>
-                <span class="difficulty-badge">Medium</span>
-              </div>
-              <h3 class="workout-title">General Aerobic + Strides</h3>
-              <p class="workout-detail">4&times;20 sec strides in the final mile of the run.</p>
-              <div class="card-footer">
-                <span class="mileage-number">10</span>
-                <span class="mileage-label">mi</span>
-              </div>
-            </article>
-
-            <!-- Sunday (featured — spans 2 columns) -->
-            <article class="workout-card card--featured reveal-on-scroll" data-difficulty="long" data-workout="run-sunday">
-              <div class="card-header">
-                <span class="day-name">Sunday</span>
-                <span class="difficulty-badge">Long</span>
-              </div>
-              <h3 class="workout-title">Long Run</h3>
-              <p class="workout-detail">Easy&ndash;moderate effort throughout. Final 3 mi drift down to marathon pace.</p>
-              <div class="card-footer">
-                <span class="mileage-number">14</span>
-                <span class="mileage-label">mi</span>
-              </div>
-            </article>
-
+          <div class="card-grid" id="run-card-grid">
+            <!-- Cards rendered dynamically from database -->
           </div>
         </div>
       </section>
@@ -163,50 +66,13 @@
         <div class="container">
           <span class="section-label reveal-on-scroll">03 &mdash; Weekly Summary</span>
           <div class="summary-inner">
-
-            <div class="mileage-chart reveal-on-scroll">
-              <div class="bar-item" data-mi="4">
-                <div class="bar" style="--pct: 28.6"></div>
-                <span class="bar-day">Mon</span>
-                <span class="bar-mi">4</span>
-              </div>
-              <div class="bar-item" data-mi="8">
-                <div class="bar" style="--pct: 57.1"></div>
-                <span class="bar-day">Tue</span>
-                <span class="bar-mi">8</span>
-              </div>
-              <div class="bar-item" data-mi="6">
-                <div class="bar" style="--pct: 42.9"></div>
-                <span class="bar-day">Wed</span>
-                <span class="bar-mi">6</span>
-              </div>
-              <div class="bar-item" data-mi="8">
-                <div class="bar" style="--pct: 57.1"></div>
-                <span class="bar-day">Thu</span>
-                <span class="bar-mi">8</span>
-              </div>
-              <div class="bar-item" data-mi="0">
-                <div class="bar" style="--pct: 0"></div>
-                <span class="bar-day">Fri</span>
-                <span class="bar-mi">—</span>
-              </div>
-              <div class="bar-item" data-mi="10">
-                <div class="bar" style="--pct: 71.4"></div>
-                <span class="bar-day">Sat</span>
-                <span class="bar-mi">10</span>
-              </div>
-              <div class="bar-item" data-mi="14">
-                <div class="bar" style="--pct: 100"></div>
-                <span class="bar-day">Sun</span>
-                <span class="bar-mi">14</span>
-              </div>
+            <div class="mileage-chart reveal-on-scroll" id="run-mileage-chart">
+              <!-- Bar items rendered dynamically from database -->
             </div>
-
             <div class="summary-total reveal-on-scroll">
-              <span class="total-number">50</span>
+              <span class="total-number" id="run-total-number">&mdash;</span>
               <span class="total-label">total miles</span>
             </div>
-
           </div>
         </div>
       </section>
@@ -545,10 +411,63 @@
           document.getElementById('header-subtitle').textContent = subtitles[target];
 
           observePanel(panel);
+
+          if (target === 'run') loadRunTab();
         });
       });
 
 
+
+      // ── Run Tab: workout type → UI mappings ──────────────────────────────────
+
+      const WORKOUT_DIFFICULTY = {
+        'Easy':       'easy',
+        'Intervals':  'hard',
+        'Tempo':      'hard',
+        'Long':       'long',
+        'Cross-train': 'medium',
+        'Rest':       'rest',
+        'Shakeout':   'easy',
+        'Race':       'hard'
+      };
+
+      const WORKOUT_TITLES = {
+        'Easy':       'Easy Run',
+        'Intervals':  'VO\u2082max Intervals',
+        'Tempo':      'Tempo Run',
+        'Long':       'Long Run',
+        'Cross-train': 'Cross-Training',
+        'Rest':       'Rest Day',
+        'Shakeout':   'Shakeout Run',
+        'Race':       'Race Day'
+      };
+
+      const DIFFICULTY_LABEL = {
+        'easy': 'Easy', 'medium': 'Medium', 'hard': 'Hard',
+        'long': 'Long', 'rest': 'Rest'
+      };
+
+      const DAY_ABBREV = {
+        'Monday': 'Mon', 'Tuesday': 'Tue', 'Wednesday': 'Wed',
+        'Thursday': 'Thu', 'Friday': 'Fri', 'Saturday': 'Sat', 'Sunday': 'Sun'
+      };
+
+      function mapSegmentTypeToIntensity(segmentType) {
+        switch (segmentType) {
+          case 'warmup':
+          case 'cooldown':    return 'easy';
+          case 'interval_rep':
+          case 'stride':      return 'hard';
+          case 'main_set':    return 'moderate';
+          case 'cross_train': return 'moderate';
+          default:            return 'moderate';
+        }
+      }
+
+      // Cache for fetched workout segments (keyed by workout id)
+      const segmentCache = {};
+
+      // ── Tri Tab: hardcoded workout detail data ────────────────────────────────
 
       const workoutData = {
         'run-monday': {
@@ -697,28 +616,11 @@
       const dialogStat = dialog.querySelector('.dialog-stat');
       const dialogDesc = dialog.querySelector('.dialog-description');
 
-      function openWorkout(card) {
-        const key = card.dataset.workout;
-        const data = workoutData[key];
-        if (!data) return;
-
-        dialogDay.textContent = card.querySelector('.day-name').textContent;
-
-        const diffBadge = card.querySelector('.difficulty-badge');
-        dialogDiff.textContent = diffBadge.textContent;
-        dialogDiff.setAttribute('data-intensity', card.dataset.difficulty);
-
-        dialogTitle.textContent = card.querySelector('.workout-title').textContent;
-
-        const footer = card.querySelector('.card-footer');
-        dialogStat.innerHTML = footer ? footer.innerHTML : '';
-
-        dialogDesc.textContent = data.description;
-
+      function renderSegments(data) {
         segmentBar.innerHTML = '';
         segmentLabels.innerHTML = '';
 
-        if (data.segments.length === 0) {
+        if (!data.segments || data.segments.length === 0) {
           dialogViz.classList.add('dialog-viz--rest');
         } else {
           dialogViz.classList.remove('dialog-viz--rest');
@@ -737,8 +639,59 @@
             segmentLabels.appendChild(lbl);
           });
         }
+      }
 
+      async function openWorkout(card) {
+        const key = card.dataset.workout;
+        const workoutId = card.dataset.workoutId;
+
+        dialogDay.textContent = card.querySelector('.day-name').textContent;
+
+        const diffBadge = card.querySelector('.difficulty-badge');
+        dialogDiff.textContent = diffBadge.textContent;
+        dialogDiff.setAttribute('data-intensity', card.dataset.difficulty);
+
+        dialogTitle.textContent = card.querySelector('.workout-title').textContent;
+
+        const footer = card.querySelector('.card-footer');
+        dialogStat.innerHTML = footer ? footer.innerHTML : '';
+
+        // Show dialog immediately with loading state
+        dialogDesc.textContent = '\u2026';
+        dialogViz.classList.add('dialog-viz--rest');
+        segmentBar.innerHTML = '';
+        segmentLabels.innerHTML = '';
         dialog.showModal();
+
+        if (workoutId) {
+          // Run workout: fetch segments from API
+          let data;
+          if (segmentCache[workoutId]) {
+            data = segmentCache[workoutId];
+          } else {
+            try {
+              const resp = await fetch('/api/workouts/' + workoutId);
+              const json = await resp.json();
+              const segs = (json.workout_segments || []).map(seg => ({
+                label: seg.description || seg.segment_type,
+                minutes: seg.duration_minutes || Math.max(1, Math.round((seg.distance_miles || 0) * 9)),
+                intensity: mapSegmentTypeToIntensity(seg.segment_type)
+              }));
+              data = { description: json.notes || '', segments: segs };
+              segmentCache[workoutId] = data;
+            } catch {
+              data = { description: card.querySelector('.workout-detail').textContent, segments: [] };
+            }
+          }
+          dialogDesc.textContent = data.description;
+          renderSegments(data);
+        } else {
+          // Tri workout: use hardcoded data
+          const data = workoutData[key];
+          if (!data) { dialogDesc.textContent = ''; return; }
+          dialogDesc.textContent = data.description;
+          renderSegments(data);
+        }
       }
 
       // Close handlers
@@ -747,43 +700,208 @@
         if (e.target === dialog) dialog.close();
       });
 
-      // Attach click + keyboard handlers to all workout cards
-      document.querySelectorAll('.workout-card[data-workout]').forEach(card => {
-        card.setAttribute('tabindex', '0');
-        card.setAttribute('role', 'button');
-        card.addEventListener('click', () => openWorkout(card));
-        card.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            openWorkout(card);
-          }
+      function attachCardHandlers(container) {
+        container.querySelectorAll('.workout-card[data-workout]').forEach(card => {
+          card.setAttribute('tabindex', '0');
+          card.setAttribute('role', 'button');
+          card.addEventListener('click', () => openWorkout(card));
+          card.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              openWorkout(card);
+            }
+          });
         });
-      });
+      }
 
-      // Training plan progression data
-      const runPlan = {
-        raceDate: 'May 3, 2026',
-        raceName: 'Half-Marathon',
-        currentWeek: 14,
-        weeks: [
-          { week: 1,  miles: 25, phase: 'base' },
-          { week: 2,  miles: 28, phase: 'base' },
-          { week: 3,  miles: 30, phase: 'base' },
-          { week: 4,  miles: 24, phase: 'base' },
-          { week: 5,  miles: 32, phase: 'build-1' },
-          { week: 6,  miles: 35, phase: 'build-1' },
-          { week: 7,  miles: 38, phase: 'build-1' },
-          { week: 8,  miles: 30, phase: 'build-1' },
-          { week: 9,  miles: 40, phase: 'build-2' },
-          { week: 10, miles: 43, phase: 'build-2' },
-          { week: 11, miles: 45, phase: 'build-2' },
-          { week: 12, miles: 36, phase: 'build-2' },
-          { week: 13, miles: 48, phase: 'peak' },
-          { week: 14, miles: 50, phase: 'peak' },
-          { week: 15, miles: 40, phase: 'taper' },
-          { week: 16, miles: 28, phase: 'taper' },
-        ]
-      };
+      // Attach handlers to all static (tri) workout cards
+      attachCardHandlers(document.getElementById('tab-tri'));
+
+      // ── Run Tab: dynamic render functions ────────────────────────────────────
+
+      function findCurrentWeek(weeks) {
+        const today = new Date().toISOString().slice(0, 10);
+        let current = weeks.find(w => today >= w.week_start && today <= w.week_end);
+        if (!current) current = weeks.find(w => w.week_start > today);
+        if (!current) current = weeks[weeks.length - 1];
+        return current;
+      }
+
+      function mapPhaseForChart(dbPhase) {
+        switch (dbPhase) {
+          case 'Build':  return 'build';
+          case 'Taper':  return 'taper';
+          case 'Race':   return 'peak';
+          default:       return 'base';
+        }
+      }
+
+      function formatRaceDate(isoDate) {
+        if (!isoDate) return '';
+        const [y, m, d] = isoDate.split('-').map(Number);
+        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        return months[m - 1] + ' ' + d + ', ' + y;
+      }
+
+      function renderRunHero(currentWeek, plan) {
+        const totalMiles = currentWeek
+          ? (currentWeek.workouts || []).reduce((sum, w) => sum + (w.total_miles || 0), 0)
+          : null;
+
+        const heroNum = document.getElementById('run-hero-number');
+        heroNum.textContent = totalMiles != null ? totalMiles : '—';
+
+        const desc = document.getElementById('run-hero-description');
+        if (currentWeek && plan) {
+          desc.textContent = 'Week ' + currentWeek.week_number + ' — ' + currentWeek.label +
+            '. Goal: ' + plan.race_name + ' on ' + formatRaceDate(plan.race_date) +
+            ' in ' + plan.goal_time + ' (' + plan.goal_pace_per_mile + '/mi).';
+        } else {
+          desc.textContent = 'No active training week found.';
+        }
+      }
+
+      function renderRunCards(workouts) {
+        const grid = document.getElementById('run-card-grid');
+        grid.innerHTML = '';
+
+        const allDays = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+        // Create a map of day -> workout
+        const byDay = {};
+        (workouts || []).forEach(w => { byDay[w.day_of_week] = w; });
+
+        allDays.forEach(day => {
+          const workout = byDay[day];
+          if (!workout) return;
+
+          const difficulty = WORKOUT_DIFFICULTY[workout.workout_type] || 'easy';
+          const title = WORKOUT_TITLES[workout.workout_type] || workout.workout_type;
+          const diffLabel = DIFFICULTY_LABEL[difficulty] || difficulty;
+
+          const isLong = workout.workout_type === 'Long';
+          const isRace = workout.workout_type === 'Race';
+          const isFeatured = isLong || isRace || day === 'Sunday';
+
+          const article = document.createElement('article');
+          article.className = 'workout-card reveal-on-scroll' + (isFeatured ? ' card--featured' : '');
+          article.setAttribute('data-difficulty', difficulty);
+          article.setAttribute('data-workout', 'run-' + day.toLowerCase());
+          article.setAttribute('data-workout-id', workout.id);
+
+          const miles = workout.total_miles;
+          const footerHTML = workout.is_rest_day
+            ? '<span class="mileage-number" style="color: var(--color-secondary); font-size: 1.1rem;">\u2014</span>'
+            : '<span class="mileage-number">' + (miles != null ? miles : '—') + '</span>' +
+              '<span class="mileage-label">mi</span>';
+
+          const paceInfo = workout.primary_pace_zone
+            ? ' <span class="workout-pace-zone">' + workout.primary_pace_zone + '</span>'
+            : '';
+
+          article.innerHTML =
+            '<div class="card-header">' +
+              '<span class="day-name">' + day + '</span>' +
+              '<span class="difficulty-badge">' + diffLabel + '</span>' +
+            '</div>' +
+            '<h3 class="workout-title">' + title + '</h3>' +
+            '<p class="workout-detail">' + (workout.notes || '') + paceInfo + '</p>' +
+            '<div class="card-footer">' + footerHTML + '</div>';
+
+          grid.appendChild(article);
+        });
+
+        // Re-attach click handlers and observe for scroll reveal
+        attachCardHandlers(grid);
+        observePanel(document.getElementById('tab-run'));
+      }
+
+      function renderRunBarChart(workouts) {
+        const chart = document.getElementById('run-mileage-chart');
+        const totalEl = document.getElementById('run-total-number');
+        chart.innerHTML = '';
+
+        const allDays = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+        const byDay = {};
+        (workouts || []).forEach(w => { byDay[w.day_of_week] = w; });
+
+        const maxMiles = Math.max(...allDays.map(d => (byDay[d] && byDay[d].total_miles) || 0), 1);
+        let weekTotal = 0;
+
+        allDays.forEach(day => {
+          const workout = byDay[day];
+          const miles = (workout && workout.total_miles) || 0;
+          const pct = (miles / maxMiles) * 100;
+          weekTotal += miles;
+
+          const item = document.createElement('div');
+          item.className = 'bar-item';
+          item.setAttribute('data-mi', miles);
+          item.innerHTML =
+            '<div class="bar" style="--pct: ' + pct.toFixed(1) + '"></div>' +
+            '<span class="bar-day">' + DAY_ABBREV[day] + '</span>' +
+            '<span class="bar-mi">' + (miles > 0 ? miles : '\u2014') + '</span>';
+          chart.appendChild(item);
+        });
+
+        totalEl.textContent = weekTotal > 0 ? weekTotal : '—';
+      }
+
+      function buildRunPlan(weeks, plan, currentWeek) {
+        const raceDate = plan ? formatRaceDate(plan.race_date) : '';
+        const raceName = plan ? plan.race_name : 'Race';
+        const currentWeekNum = currentWeek ? currentWeek.week_number : null;
+
+        return {
+          raceDate,
+          raceName,
+          currentWeek: currentWeekNum,
+          weeks: weeks.map(w => ({
+            week: w.week_number,
+            miles: w.target_mileage || 0,
+            phase: mapPhaseForChart(w.phase)
+          }))
+        };
+      }
+
+      async function loadRunTab() {
+        try {
+          const [planResp, weeksResp] = await Promise.all([
+            fetch('/api/plan'),
+            fetch('/api/weeks')
+          ]);
+
+          const plan = planResp.ok ? await planResp.json() : null;
+          const weeksData = weeksResp.ok ? await weeksResp.json() : [];
+
+          const currentWeek = findCurrentWeek(weeksData);
+
+          // If we have a current week, fetch it with nested workouts
+          let weekWithWorkouts = null;
+          if (currentWeek) {
+            // weeksData already contains nested workouts from GET /api/weeks
+            weekWithWorkouts = weeksData.find(w => w.id === currentWeek.id) || currentWeek;
+          }
+
+          renderRunHero(weekWithWorkouts, plan);
+          renderRunCards(weekWithWorkouts ? weekWithWorkouts.workouts : []);
+          renderRunBarChart(weekWithWorkouts ? weekWithWorkouts.workouts : []);
+
+          // Render progression chart
+          const runPlan = buildRunPlan(weeksData, plan, currentWeek);
+          const chart = document.getElementById('run-progression-chart');
+          const phases = document.getElementById('run-progression-phases');
+          if (chart) chart.innerHTML = '';
+          if (phases) phases.innerHTML = '';
+          renderProgression(runPlan, 'run', false);
+
+        } catch (err) {
+          console.error('[loadRunTab] Error:', err);
+          document.getElementById('run-hero-description').textContent =
+            'Failed to load training plan. Please refresh.';
+        }
+      }
+
+      // ── Tri Tab: hardcoded progression data ───────────────────────────────────
 
       const triPlan = {
         raceDate: 'May 3, 2026',
@@ -813,8 +931,10 @@
         'base':    'Base',
         'build-1': 'Build I',
         'build-2': 'Build II',
+        'build':   'Build',
         'peak':    'Peak',
-        'taper':   'Taper'
+        'taper':   'Taper',
+        'race':    'Race'
       };
 
       function renderProgression(plan, tabPrefix, isTri) {
@@ -882,7 +1002,7 @@
         });
       }
 
-      renderProgression(runPlan, 'run', false);
+      loadRunTab();
       renderProgression(triPlan, 'tri', true);
 
       // ── Chat Tab ─────────────────────────────────────────────────────────────
