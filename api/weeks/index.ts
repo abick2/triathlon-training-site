@@ -22,7 +22,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         workouts (*)
       `)
       .order('week_number', { ascending: true })
-      .order('date', { referencedTable: 'workouts', ascending: true });
+      .order('workout_date', { referencedTable: 'workouts', ascending: true });
 
     if (error) {
       console.error('[GET /api/weeks] Supabase error:', error.message);

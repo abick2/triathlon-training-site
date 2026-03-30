@@ -180,48 +180,49 @@ describe('COACH_TOOLS schema', () => {
     expect(tool.input_schema.required).toHaveLength(0);
   });
 
-  it('update_workout intensity enum contains all valid values', () => {
+  it('update_workout workout_type enum contains all valid values', () => {
     const tool = COACH_TOOLS.find((t) => t.name === 'update_workout')!;
-    const intensityProp = (tool.input_schema.properties as Record<string, unknown>).updates as {
+    const updatesProp = (tool.input_schema.properties as Record<string, unknown>).updates as {
       properties: Record<string, { enum?: string[] }>;
     };
-    const intensityEnum = intensityProp.properties.intensity.enum;
-    expect(intensityEnum).toContain('easy');
-    expect(intensityEnum).toContain('moderate');
-    expect(intensityEnum).toContain('hard');
-    expect(intensityEnum).toContain('race');
-    expect(intensityEnum).toContain('rest');
+    const workoutTypeEnum = updatesProp.properties.workout_type.enum;
+    expect(workoutTypeEnum).toContain('Easy');
+    expect(workoutTypeEnum).toContain('Intervals');
+    expect(workoutTypeEnum).toContain('Tempo');
+    expect(workoutTypeEnum).toContain('Long');
+    expect(workoutTypeEnum).toContain('Rest');
+    expect(workoutTypeEnum).toContain('Race');
   });
 });
 
 // ─── Tool execution ───────────────────────────────────────────────────────────
 
 const FIXTURE_WORKOUT = {
-  id: 'aaa',
-  week_id: 'bbb',
-  date: '2026-03-24',
+  id: 1,
+  week_id: 1,
+  plan_id: 1,
+  workout_date: '2026-03-24',
   day_of_week: 'Tuesday',
-  sport: 'swim',
-  title: 'Aerobic Base Swim',
-  description: 'Warm-Up...',
-  duration_min: 50,
-  distance: '2200 yards',
-  intensity: 'easy',
-  completed: false,
+  workout_type: 'Easy',
+  total_miles: 6,
+  primary_pace_zone: 'Easy/Recovery',
   notes: null,
+  is_rest_day: false,
+  is_race_day: false,
+  is_key_workout: false,
 };
 
 describe('executeTool — get_workout', () => {
   it('returns success with workout data', async () => {
     mockSingleResult = { data: FIXTURE_WORKOUT, error: null };
-    const result = await executeTool('get_workout', { workout_id: 'aaa' });
+    const result = await executeTool('get_workout', { workout_id: 1 });
     expect(result.success).toBe(true);
     expect(result.data).toEqual(FIXTURE_WORKOUT);
   });
 
   it('returns error when workout not found (PGRST116)', async () => {
     mockSingleResult = { data: null, error: { code: 'PGRST116', message: 'not found' } };
-    const result = await executeTool('get_workout', { workout_id: 'nonexistent' });
+    const result = await executeTool('get_workout', { workout_id: 999 });
     expect(result.success).toBe(false);
     expect(result.error).toContain('not found');
   });
@@ -229,10 +230,10 @@ describe('executeTool — get_workout', () => {
 
 describe('executeTool — update_workout', () => {
   it('returns success with updated workout', async () => {
-    mockSingleResult = { data: { ...FIXTURE_WORKOUT, completed: true }, error: null };
+    mockSingleResult = { data: { ...FIXTURE_WORKOUT, notes: 'Great session.' }, error: null };
     const result = await executeTool('update_workout', {
-      workout_id: 'aaa',
-      updates: { completed: true },
+      workout_id: 1,
+      updates: { notes: 'Great session.' },
     });
     expect(result.success).toBe(true);
   });
@@ -240,8 +241,8 @@ describe('executeTool — update_workout', () => {
   it('returns error on DB failure', async () => {
     mockSingleResult = { data: null, error: { code: '23514', message: 'Check constraint failed' } };
     const result = await executeTool('update_workout', {
-      workout_id: 'aaa',
-      updates: { sport: 'invalid' },
+      workout_id: 1,
+      updates: { workout_type: 'invalid' },
     });
     expect(result.success).toBe(false);
     expect(result.error).toBeDefined();
@@ -258,7 +259,7 @@ describe('executeTool — get_workouts', () => {
 
   it('returns workouts list on success', async () => {
     mockListResult = { data: [FIXTURE_WORKOUT], error: null };
-    const result = await executeTool('get_workouts', { week_id: 'bbb' });
+    const result = await executeTool('get_workouts', { week_id: 1 });
     expect(result.success).toBe(true);
     expect(result.data).toEqual([FIXTURE_WORKOUT]);
   });
@@ -275,7 +276,7 @@ describe('executeTool — add_workout_note', () => {
     // First call: fetch existing notes (null)
     mockSingleResult = { data: { notes: null }, error: null };
     const result = await executeTool('add_workout_note', {
-      workout_id: 'aaa',
+      workout_id: 1,
       note: 'Felt great today.',
     });
     // The update mock also returns mockSingleResult
@@ -285,7 +286,7 @@ describe('executeTool — add_workout_note', () => {
   it('returns error when workout not found on note fetch', async () => {
     mockSingleResult = { data: null, error: { code: 'PGRST116', message: 'not found' } };
     const result = await executeTool('add_workout_note', {
-      workout_id: 'nonexistent',
+      workout_id: 999,
       note: 'Felt great.',
     });
     expect(result.success).toBe(false);

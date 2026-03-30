@@ -3,21 +3,21 @@
  *
  * Mock strategy: vi.mock() is hoisted to the top of the module.
  * Each describe block controls the mock's resolved values via the shared
- * `mockSupabaseResult` / `mockSingleResult` objects.
+ * `mockListResult` / `mockSingleResult` objects.
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import {
-  fixtureWorkoutSwim,
-  fixtureWorkoutRun,
+  fixtureWorkoutEasy,
+  fixtureWorkoutRest,
+  fixtureWorkoutWithSegments,
   fixtureCreateWorkoutBody,
   fixtureUpdateWorkoutBody,
   FIXTURE_WORKOUT_ID,
 } from '../fixtures/index.js';
 
 // ─── Shared mock state ────────────────────────────────────────────────────────
-// Each test sets these before calling the handler.
 
 let mockListResult: { data: unknown; error: unknown } = { data: [], error: null };
 let mockSingleResult: { data: unknown; error: unknown } = { data: null, error: null };
@@ -33,8 +33,12 @@ vi.mock('../../lib/supabase.js', () => {
         // SELECT list: .select().order() or .select().eq().order()
         select: (_cols: string) => ({
           order: (_col: string) => Promise.resolve(mockListResult),
-          eq: (_col: string, _val: string) => ({
-            order: () => Promise.resolve(mockListResult),
+          eq: (_col: string, _val: unknown) => ({
+            // GET [id] chain: .eq().order().single()
+            order: () => ({
+              single: () => Promise.resolve(mockSingleResult),
+            }),
+            // Also support .eq().single() for older patterns
             single: () => Promise.resolve(mockSingleResult),
           }),
           single: () => Promise.resolve(mockSingleResult),
@@ -47,7 +51,7 @@ vi.mock('../../lib/supabase.js', () => {
         }),
         // UPDATE: .update().eq().select().single()
         update: (_data: unknown) => ({
-          eq: (_col: string, _val: string) => ({
+          eq: (_col: string, _val: unknown) => ({
             select: () => ({
               single: () => Promise.resolve(mockMutateResult),
             }),
@@ -55,7 +59,7 @@ vi.mock('../../lib/supabase.js', () => {
         }),
         // DELETE: .delete().eq()
         delete: () => ({
-          eq: (_col: string, _val: string) => Promise.resolve(mockDeleteResult),
+          eq: (_col: string, _val: unknown) => Promise.resolve(mockDeleteResult),
         }),
       }),
     }),
@@ -86,13 +90,13 @@ function makeReq(method: string, body?: unknown, query?: Record<string, string>)
 
 describe('GET /api/workouts', () => {
   it('returns 200 with workout list', async () => {
-    mockListResult = { data: [fixtureWorkoutSwim, fixtureWorkoutRun], error: null };
+    mockListResult = { data: [fixtureWorkoutEasy, fixtureWorkoutRest], error: null };
 
     const res = makeResMock();
     await handler(makeReq('GET'), res);
 
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith([fixtureWorkoutSwim, fixtureWorkoutRun]);
+    expect(res.json).toHaveBeenCalledWith([fixtureWorkoutEasy, fixtureWorkoutRest]);
   });
 
   it('returns 200 with empty array when no workouts', async () => {
@@ -143,30 +147,21 @@ describe('POST /api/workouts — input validation', () => {
     );
   });
 
-  it('returns 400 for invalid sport', async () => {
+  it('returns 400 for invalid workout_type', async () => {
     const res = makeResMock();
-    await handler(makeReq('POST', { ...fixtureCreateWorkoutBody, sport: 'yoga' }), res);
+    await handler(makeReq('POST', { ...fixtureCreateWorkoutBody, workout_type: 'Yoga' }), res);
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({ error: expect.stringContaining('sport') })
+      expect.objectContaining({ error: expect.stringContaining('workout_type') })
     );
   });
 
-  it('returns 400 for invalid intensity', async () => {
+  it('returns 400 for malformed workout_date', async () => {
     const res = makeResMock();
-    await handler(makeReq('POST', { ...fixtureCreateWorkoutBody, intensity: 'brutal' }), res);
+    await handler(makeReq('POST', { ...fixtureCreateWorkoutBody, workout_date: '3/30/2026' }), res);
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({ error: expect.stringContaining('intensity') })
-    );
-  });
-
-  it('returns 400 for malformed date', async () => {
-    const res = makeResMock();
-    await handler(makeReq('POST', { ...fixtureCreateWorkoutBody, date: '3/26/2026' }), res);
-    expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({ error: expect.stringContaining('date') })
+      expect.objectContaining({ error: expect.stringContaining('workout_date') })
     );
   });
 
@@ -176,31 +171,26 @@ describe('POST /api/workouts — input validation', () => {
     expect(res.status).toHaveBeenCalledWith(400);
   });
 
-  it('returns 400 for non-integer duration_min', async () => {
+  it('returns 400 for negative total_miles', async () => {
     const res = makeResMock();
-    await handler(makeReq('POST', { ...fixtureCreateWorkoutBody, duration_min: 45.5 }), res);
+    await handler(makeReq('POST', { ...fixtureCreateWorkoutBody, total_miles: -5 }), res);
     expect(res.status).toHaveBeenCalledWith(400);
   });
 
-  it('returns 400 for negative duration_min', async () => {
+  it('allows null total_miles', async () => {
+    mockMutateResult = { data: { ...fixtureWorkoutRest }, error: null };
     const res = makeResMock();
-    await handler(makeReq('POST', { ...fixtureCreateWorkoutBody, duration_min: -10 }), res);
-    expect(res.status).toHaveBeenCalledWith(400);
-  });
-
-  it('returns 400 for empty title', async () => {
-    const res = makeResMock();
-    await handler(makeReq('POST', { ...fixtureCreateWorkoutBody, title: '   ' }), res);
-    expect(res.status).toHaveBeenCalledWith(400);
+    await handler(makeReq('POST', { ...fixtureCreateWorkoutBody, total_miles: null }), res);
+    expect(res.status).toHaveBeenCalledWith(201);
   });
 
   it('returns 201 for a valid body', async () => {
-    mockMutateResult = { data: fixtureWorkoutSwim, error: null };
+    mockMutateResult = { data: fixtureWorkoutEasy, error: null };
 
     const res = makeResMock();
     await handler(makeReq('POST', fixtureCreateWorkoutBody), res);
     expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith(fixtureWorkoutSwim);
+    expect(res.json).toHaveBeenCalledWith(fixtureWorkoutEasy);
   });
 
   it('returns 404 when week_id foreign key not found', async () => {
@@ -209,38 +199,44 @@ describe('POST /api/workouts — input validation', () => {
     const res = makeResMock();
     await handler(makeReq('POST', fixtureCreateWorkoutBody), res);
     expect(res.status).toHaveBeenCalledWith(404);
-    expect(res.json).toHaveBeenCalledWith({ error: 'week_id not found' });
+    expect(res.json).toHaveBeenCalledWith({ error: 'week_id or plan_id not found' });
   });
 });
 
 // ─── GET /api/workouts/[id] ───────────────────────────────────────────────────
 
 describe('GET /api/workouts/[id]', () => {
-  it('returns 400 for a non-UUID id', async () => {
+  it('returns 400 for a non-integer id', async () => {
     const res = makeResMock();
-    await idHandler(makeReq('GET', null, { id: 'not-a-uuid' }), res);
+    await idHandler(makeReq('GET', null, { id: 'not-an-int' }), res);
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({ error: expect.stringContaining('UUID') })
+      expect.objectContaining({ error: expect.stringContaining('integer') })
     );
+  });
+
+  it('returns 400 for zero id', async () => {
+    const res = makeResMock();
+    await idHandler(makeReq('GET', null, { id: '0' }), res);
+    expect(res.status).toHaveBeenCalledWith(400);
   });
 
   it('returns 404 when workout not found (PGRST116)', async () => {
     mockSingleResult = { data: null, error: { code: 'PGRST116', message: 'not found' } };
 
     const res = makeResMock();
-    await idHandler(makeReq('GET', null, { id: FIXTURE_WORKOUT_ID }), res);
+    await idHandler(makeReq('GET', null, { id: String(FIXTURE_WORKOUT_ID) }), res);
     expect(res.status).toHaveBeenCalledWith(404);
     expect(res.json).toHaveBeenCalledWith({ error: 'Workout not found' });
   });
 
-  it('returns 200 with the workout on success', async () => {
-    mockSingleResult = { data: fixtureWorkoutSwim, error: null };
+  it('returns 200 with workout and segments on success', async () => {
+    mockSingleResult = { data: fixtureWorkoutWithSegments, error: null };
 
     const res = makeResMock();
-    await idHandler(makeReq('GET', null, { id: FIXTURE_WORKOUT_ID }), res);
+    await idHandler(makeReq('GET', null, { id: String(FIXTURE_WORKOUT_ID) }), res);
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(fixtureWorkoutSwim);
+    expect(res.json).toHaveBeenCalledWith(fixtureWorkoutWithSegments);
   });
 });
 
@@ -249,44 +245,50 @@ describe('GET /api/workouts/[id]', () => {
 describe('PUT /api/workouts/[id] — input validation', () => {
   it('returns 400 for empty body', async () => {
     const res = makeResMock();
-    await idHandler(makeReq('PUT', {}, { id: FIXTURE_WORKOUT_ID }), res);
+    await idHandler(makeReq('PUT', {}, { id: String(FIXTURE_WORKOUT_ID) }), res);
     expect(res.status).toHaveBeenCalledWith(400);
   });
 
-  it('returns 400 for invalid sport', async () => {
+  it('returns 400 for invalid workout_type', async () => {
     const res = makeResMock();
-    await idHandler(makeReq('PUT', { sport: 'yoga' }, { id: FIXTURE_WORKOUT_ID }), res);
+    await idHandler(makeReq('PUT', { workout_type: 'Yoga' }, { id: String(FIXTURE_WORKOUT_ID) }), res);
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({ error: expect.stringContaining('sport') })
+      expect.objectContaining({ error: expect.stringContaining('workout_type') })
     );
   });
 
-  it('returns 400 for non-boolean completed', async () => {
+  it('returns 400 for non-boolean is_rest_day', async () => {
     const res = makeResMock();
-    await idHandler(makeReq('PUT', { completed: 'yes' }, { id: FIXTURE_WORKOUT_ID }), res);
+    await idHandler(makeReq('PUT', { is_rest_day: 'yes' }, { id: String(FIXTURE_WORKOUT_ID) }), res);
     expect(res.status).toHaveBeenCalledWith(400);
   });
 
-  it('returns 400 for invalid date format', async () => {
+  it('returns 400 for invalid workout_date format', async () => {
     const res = makeResMock();
-    await idHandler(makeReq('PUT', { date: '26-03-2026' }, { id: FIXTURE_WORKOUT_ID }), res);
+    await idHandler(makeReq('PUT', { workout_date: '30-03-2026' }, { id: String(FIXTURE_WORKOUT_ID) }), res);
     expect(res.status).toHaveBeenCalledWith(400);
   });
 
-  it('returns 200 for a valid partial update', async () => {
-    mockMutateResult = { data: { ...fixtureWorkoutSwim, completed: true }, error: null };
+  it('returns 400 for negative total_miles', async () => {
+    const res = makeResMock();
+    await idHandler(makeReq('PUT', { total_miles: -1 }, { id: String(FIXTURE_WORKOUT_ID) }), res);
+    expect(res.status).toHaveBeenCalledWith(400);
+  });
+
+  it('allows null total_miles in an update', async () => {
+    mockMutateResult = { data: { ...fixtureWorkoutRest }, error: null };
 
     const res = makeResMock();
-    await idHandler(makeReq('PUT', fixtureUpdateWorkoutBody, { id: FIXTURE_WORKOUT_ID }), res);
+    await idHandler(makeReq('PUT', { total_miles: null }, { id: String(FIXTURE_WORKOUT_ID) }), res);
     expect(res.status).toHaveBeenCalledWith(200);
   });
 
-  it('allows null duration_min in an update', async () => {
-    mockMutateResult = { data: { ...fixtureWorkoutSwim, duration_min: null }, error: null };
+  it('returns 200 for a valid partial update (notes)', async () => {
+    mockMutateResult = { data: { ...fixtureWorkoutEasy, notes: 'Felt great.' }, error: null };
 
     const res = makeResMock();
-    await idHandler(makeReq('PUT', { duration_min: null }, { id: FIXTURE_WORKOUT_ID }), res);
+    await idHandler(makeReq('PUT', fixtureUpdateWorkoutBody, { id: String(FIXTURE_WORKOUT_ID) }), res);
     expect(res.status).toHaveBeenCalledWith(200);
   });
 
@@ -294,7 +296,7 @@ describe('PUT /api/workouts/[id] — input validation', () => {
     mockMutateResult = { data: null, error: { code: 'PGRST116', message: 'not found' } };
 
     const res = makeResMock();
-    await idHandler(makeReq('PUT', fixtureUpdateWorkoutBody, { id: FIXTURE_WORKOUT_ID }), res);
+    await idHandler(makeReq('PUT', fixtureUpdateWorkoutBody, { id: String(FIXTURE_WORKOUT_ID) }), res);
     expect(res.status).toHaveBeenCalledWith(404);
   });
 });
@@ -306,12 +308,12 @@ describe('DELETE /api/workouts/[id]', () => {
     mockDeleteResult = { error: null };
 
     const res = makeResMock();
-    await idHandler(makeReq('DELETE', null, { id: FIXTURE_WORKOUT_ID }), res);
+    await idHandler(makeReq('DELETE', null, { id: String(FIXTURE_WORKOUT_ID) }), res);
     expect(res.status).toHaveBeenCalledWith(204);
     expect(res.end).toHaveBeenCalled();
   });
 
-  it('returns 400 for an invalid UUID', async () => {
+  it('returns 400 for an invalid id', async () => {
     const res = makeResMock();
     await idHandler(makeReq('DELETE', null, { id: 'bad-id' }), res);
     expect(res.status).toHaveBeenCalledWith(400);
@@ -321,7 +323,7 @@ describe('DELETE /api/workouts/[id]', () => {
     mockDeleteResult = { error: { message: 'DB error' } };
 
     const res = makeResMock();
-    await idHandler(makeReq('DELETE', null, { id: FIXTURE_WORKOUT_ID }), res);
+    await idHandler(makeReq('DELETE', null, { id: String(FIXTURE_WORKOUT_ID) }), res);
     expect(res.status).toHaveBeenCalledWith(500);
   });
 });
@@ -331,7 +333,7 @@ describe('DELETE /api/workouts/[id]', () => {
 describe('[id] endpoint — method not allowed', () => {
   it('returns 405 for PATCH', async () => {
     const res = makeResMock();
-    await idHandler(makeReq('PATCH', null, { id: FIXTURE_WORKOUT_ID }), res);
+    await idHandler(makeReq('PATCH', null, { id: String(FIXTURE_WORKOUT_ID) }), res);
     expect(res.status).toHaveBeenCalledWith(405);
   });
 });

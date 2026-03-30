@@ -1,5 +1,7 @@
-export type Sport = 'swim' | 'bike' | 'run' | 'brick' | 'rest' | 'strength';
-export type Intensity = 'easy' | 'moderate' | 'hard' | 'race' | 'rest';
+export type WorkoutType = 'Easy' | 'Intervals' | 'Tempo' | 'Long' | 'Cross-train' | 'Rest' | 'Shakeout' | 'Race';
+export type SegmentType = 'warmup' | 'main_set' | 'interval_rep' | 'cooldown' | 'stride' | 'cross_train';
+export type Phase = 'Build' | 'Taper' | 'Race';
+export type DifficultyLevel = 'easy' | 'medium' | 'hard' | 'long' | 'rest';
 export type DayOfWeek =
   | 'Monday'
   | 'Tuesday'
@@ -9,30 +11,71 @@ export type DayOfWeek =
   | 'Saturday'
   | 'Sunday';
 
-export interface TrainingWeek {
-  id: string;
-  week_number: number;
-  start_date: string; // ISO date string YYYY-MM-DD
-  end_date: string;
-  theme: string;
-  notes: string | null;
+export interface TrainingPlan {
+  id: number;
+  athlete_name: string;
+  race_name: string;
+  race_date: string; // YYYY-MM-DD
+  race_distance: string;
+  goal_time: string;
+  goal_pace_per_mile: string;
+  pr_time: string | null;
+  pr_notes: string | null;
+  current_weekly_mileage_min: number | null;
+  current_weekly_mileage_max: number | null;
+  fitness_level: string;
   created_at: string;
 }
 
-export interface Workout {
-  id: string;
-  week_id: string;
-  date: string; // ISO date string YYYY-MM-DD
-  day_of_week: DayOfWeek;
-  sport: Sport;
-  title: string;
-  description: string;
-  duration_min: number | null;
-  distance: string | null; // e.g. "1500m", "20 miles", "2200 yards"
-  intensity: Intensity;
-  completed: boolean;
+export interface PaceTarget {
+  id: number;
+  plan_id: number;
+  zone_name: string;
+  pace_min: string;
+  pace_max: string;
   notes: string | null;
-  created_at: string;
+}
+
+export interface TrainingWeek {
+  id: number;
+  plan_id: number;
+  week_number: number;
+  phase: Phase;
+  label: string;
+  week_start: string; // YYYY-MM-DD
+  week_end: string;   // YYYY-MM-DD
+  target_mileage: number | null;
+  notes: string | null;
+}
+
+export interface Workout {
+  id: number;
+  week_id: number;
+  plan_id: number;
+  workout_date: string; // YYYY-MM-DD
+  day_of_week: DayOfWeek;
+  workout_type: WorkoutType;
+  total_miles: number | null;
+  primary_pace_zone: string | null;
+  notes: string | null;
+  is_rest_day: boolean;
+  is_race_day: boolean;
+  is_key_workout: boolean;
+}
+
+export interface WorkoutSegment {
+  id: number;
+  workout_id: number;
+  segment_order: number;
+  segment_type: SegmentType;
+  description: string | null;
+  reps: number | null;
+  rep_distance: string | null;
+  pace_min: string | null;
+  pace_max: string | null;
+  rest_duration: string | null;
+  distance_miles: number | null;
+  duration_minutes: number | null;
 }
 
 export interface CoachMemory {
@@ -46,37 +89,43 @@ export interface WeekWithWorkouts extends TrainingWeek {
   workouts: Workout[];
 }
 
+export interface WorkoutWithSegments extends Workout {
+  workout_segments: WorkoutSegment[];
+}
+
+export interface PlanWithPaceTargets extends TrainingPlan {
+  pace_targets: PaceTarget[];
+}
+
 export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
 }
 
-// Request/response shapes for the API
 export interface CreateWorkoutBody {
-  week_id: string;
-  date: string;
+  week_id: number;
+  plan_id: number;
+  workout_date: string;
   day_of_week: DayOfWeek;
-  sport: Sport;
-  title: string;
-  description: string;
-  duration_min?: number;
-  distance?: string;
-  intensity: Intensity;
-  completed?: boolean;
-  notes?: string;
+  workout_type: WorkoutType;
+  total_miles?: number | null;
+  primary_pace_zone?: string | null;
+  notes?: string | null;
+  is_rest_day?: boolean;
+  is_race_day?: boolean;
+  is_key_workout?: boolean;
 }
 
 export interface UpdateWorkoutBody {
-  date?: string;
+  workout_date?: string;
   day_of_week?: DayOfWeek;
-  sport?: Sport;
-  title?: string;
-  description?: string;
-  duration_min?: number | null;
-  distance?: string | null;
-  intensity?: Intensity;
-  completed?: boolean;
+  workout_type?: WorkoutType;
+  total_miles?: number | null;
+  primary_pace_zone?: string | null;
   notes?: string | null;
+  is_rest_day?: boolean;
+  is_race_day?: boolean;
+  is_key_workout?: boolean;
 }
 
 export interface ChatRequestBody {

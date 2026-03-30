@@ -1,14 +1,13 @@
 /**
- * GET  /api/workouts          — list all workouts (optional ?week_id= filter)
- * POST /api/workouts          — create a new workout
+ * GET  /api/workouts   — list all workouts (optional ?week_id= filter)
+ * POST /api/workouts   — create a new workout
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getSupabaseClient } from '../../lib/supabase.js';
 import type { CreateWorkoutBody, Workout } from '../../types/index.js';
 
-const VALID_SPORTS = ['swim', 'bike', 'run', 'brick', 'rest', 'strength'];
-const VALID_INTENSITIES = ['easy', 'moderate', 'hard', 'race', 'rest'];
+const VALID_WORKOUT_TYPES = ['Easy', 'Intervals', 'Tempo', 'Long', 'Cross-train', 'Rest', 'Shakeout', 'Race'];
 const VALID_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -18,37 +17,31 @@ function validateCreateBody(body: unknown): { valid: true; data: CreateWorkoutBo
   }
   const b = body as Record<string, unknown>;
 
-  const required = ['week_id', 'date', 'day_of_week', 'sport', 'title', 'description', 'intensity'];
+  const required = ['week_id', 'plan_id', 'workout_date', 'day_of_week', 'workout_type'];
   for (const field of required) {
-    if (!b[field] && b[field] !== false) {
+    if (b[field] === undefined || b[field] === null || b[field] === '') {
       return { valid: false, error: `Missing required field: ${field}` };
     }
   }
 
-  if (typeof b.week_id !== 'string' || !b.week_id) {
-    return { valid: false, error: 'week_id must be a non-empty string' };
+  if (!Number.isInteger(b.week_id) || (b.week_id as number) <= 0) {
+    return { valid: false, error: 'week_id must be a positive integer' };
   }
-  if (typeof b.date !== 'string' || !ISO_DATE.test(b.date)) {
-    return { valid: false, error: 'date must be ISO format YYYY-MM-DD' };
+  if (!Number.isInteger(b.plan_id) || (b.plan_id as number) <= 0) {
+    return { valid: false, error: 'plan_id must be a positive integer' };
+  }
+  if (typeof b.workout_date !== 'string' || !ISO_DATE.test(b.workout_date)) {
+    return { valid: false, error: 'workout_date must be ISO format YYYY-MM-DD' };
   }
   if (!VALID_DAYS.includes(b.day_of_week as string)) {
     return { valid: false, error: `day_of_week must be one of: ${VALID_DAYS.join(', ')}` };
   }
-  if (!VALID_SPORTS.includes(b.sport as string)) {
-    return { valid: false, error: `sport must be one of: ${VALID_SPORTS.join(', ')}` };
+  if (!VALID_WORKOUT_TYPES.includes(b.workout_type as string)) {
+    return { valid: false, error: `workout_type must be one of: ${VALID_WORKOUT_TYPES.join(', ')}` };
   }
-  if (typeof b.title !== 'string' || !b.title.trim()) {
-    return { valid: false, error: 'title must be a non-empty string' };
-  }
-  if (typeof b.description !== 'string') {
-    return { valid: false, error: 'description must be a string' };
-  }
-  if (!VALID_INTENSITIES.includes(b.intensity as string)) {
-    return { valid: false, error: `intensity must be one of: ${VALID_INTENSITIES.join(', ')}` };
-  }
-  if (b.duration_min !== undefined && b.duration_min !== null) {
-    if (!Number.isInteger(b.duration_min) || (b.duration_min as number) <= 0) {
-      return { valid: false, error: 'duration_min must be a positive integer' };
+  if (b.total_miles !== undefined && b.total_miles !== null) {
+    if (typeof b.total_miles !== 'number' || (b.total_miles as number) < 0) {
+      return { valid: false, error: 'total_miles must be a non-negative number or null' };
     }
   }
 
@@ -64,10 +57,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       let query = supabase
         .from('workouts')
         .select('*')
-        .order('date', { ascending: true });
+        .order('workout_date', { ascending: true });
 
       if (req.query.week_id) {
-        query = query.eq('week_id', req.query.week_id as string);
+        query = query.eq('week_id', Number(req.query.week_id));
       }
 
       const { data, error } = await query;
@@ -96,24 +89,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .from('workouts')
         .insert({
           week_id: validation.data.week_id,
-          date: validation.data.date,
+          plan_id: validation.data.plan_id,
+          workout_date: validation.data.workout_date,
           day_of_week: validation.data.day_of_week,
-          sport: validation.data.sport,
-          title: validation.data.title.trim(),
-          description: validation.data.description,
-          duration_min: validation.data.duration_min ?? null,
-          distance: validation.data.distance ?? null,
-          intensity: validation.data.intensity,
-          completed: validation.data.completed ?? false,
+          workout_type: validation.data.workout_type,
+          total_miles: validation.data.total_miles ?? null,
+          primary_pace_zone: validation.data.primary_pace_zone ?? null,
           notes: validation.data.notes ?? null,
+          is_rest_day: validation.data.is_rest_day ?? false,
+          is_race_day: validation.data.is_race_day ?? false,
+          is_key_workout: validation.data.is_key_workout ?? false,
         })
         .select()
         .single();
 
       if (error) {
-        // FK violation = week_id not found
+        // FK violation = week_id or plan_id not found
         if (error.code === '23503') {
-          return res.status(404).json({ error: 'week_id not found' });
+          return res.status(404).json({ error: 'week_id or plan_id not found' });
         }
         console.error('[POST /api/workouts] Supabase error:', error.message);
         return res.status(500).json({ error: 'Failed to create workout' });

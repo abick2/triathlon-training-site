@@ -67,7 +67,7 @@ export const COACH_TOOLS: Anthropic.Tool[] = [
       properties: {
         week_number: {
           type: 'number',
-          description: 'The week number (1–15) to fetch.',
+          description: 'The week number to fetch (e.g. 1, 2, 3...).',
         },
       },
       required: ['week_number'],
@@ -81,8 +81,8 @@ export const COACH_TOOLS: Anthropic.Tool[] = [
       type: 'object',
       properties: {
         week_id: {
-          type: 'string',
-          description: 'UUID of the training week to fetch workouts for.',
+          type: 'number',
+          description: 'ID of the training week to fetch workouts for.',
         },
         start_date: {
           type: 'string',
@@ -98,13 +98,13 @@ export const COACH_TOOLS: Anthropic.Tool[] = [
   },
   {
     name: 'get_workout' satisfies CoachToolName,
-    description: 'Fetch a single workout by its UUID.',
+    description: 'Fetch a single workout by its integer ID.',
     input_schema: {
       type: 'object',
       properties: {
         workout_id: {
-          type: 'string',
-          description: 'UUID of the workout to fetch.',
+          type: 'number',
+          description: 'Integer ID of the workout to fetch.',
         },
       },
       required: ['workout_id'],
@@ -113,37 +113,33 @@ export const COACH_TOOLS: Anthropic.Tool[] = [
   {
     name: 'update_workout' satisfies CoachToolName,
     description:
-      'Update fields on a single workout. Use this to change the date, sport, title, description, intensity, duration, distance, completed status, or notes. Only include the fields you want to change.',
+      'Update fields on a single workout. Use this to change the date, workout type, mileage, pace zone, or notes. Only include the fields you want to change.',
     input_schema: {
       type: 'object',
       properties: {
         workout_id: {
-          type: 'string',
-          description: 'UUID of the workout to update.',
+          type: 'number',
+          description: 'Integer ID of the workout to update.',
         },
         updates: {
           type: 'object',
           description: 'Fields to update. Omit fields you do not want to change.',
           properties: {
-            date: { type: 'string', description: 'ISO date YYYY-MM-DD' },
+            workout_date: { type: 'string', description: 'ISO date YYYY-MM-DD' },
             day_of_week: {
               type: 'string',
               enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
             },
-            sport: {
+            workout_type: {
               type: 'string',
-              enum: ['swim', 'bike', 'run', 'brick', 'rest', 'strength'],
+              enum: ['Easy', 'Intervals', 'Tempo', 'Long', 'Cross-train', 'Rest', 'Shakeout', 'Race'],
             },
-            title: { type: 'string' },
-            description: { type: 'string' },
-            duration_min: { type: ['number', 'null'] },
-            distance: { type: ['string', 'null'] },
-            intensity: {
-              type: 'string',
-              enum: ['easy', 'moderate', 'hard', 'race', 'rest'],
-            },
-            completed: { type: 'boolean' },
+            total_miles: { type: ['number', 'null'] },
+            primary_pace_zone: { type: ['string', 'null'] },
             notes: { type: ['string', 'null'] },
+            is_rest_day: { type: 'boolean' },
+            is_race_day: { type: 'boolean' },
+            is_key_workout: { type: 'boolean' },
           },
         },
       },
@@ -158,12 +154,12 @@ export const COACH_TOOLS: Anthropic.Tool[] = [
       type: 'object',
       properties: {
         workout_id_a: {
-          type: 'string',
-          description: 'UUID of the first workout.',
+          type: 'number',
+          description: 'Integer ID of the first workout.',
         },
         workout_id_b: {
-          type: 'string',
-          description: 'UUID of the second workout.',
+          type: 'number',
+          description: 'Integer ID of the second workout.',
         },
       },
       required: ['workout_id_a', 'workout_id_b'],
@@ -176,7 +172,7 @@ export const COACH_TOOLS: Anthropic.Tool[] = [
     input_schema: {
       type: 'object',
       properties: {
-        workout_id: { type: 'string' },
+        workout_id: { type: 'number', description: 'Integer ID of the workout.' },
         note: { type: 'string', description: 'Text to append to the workout notes.' },
       },
       required: ['workout_id', 'note'],
@@ -230,7 +226,7 @@ export async function executeTool(
           .from('training_weeks')
           .select('*, workouts(*)')
           .eq('week_number', input.week_number as number)
-          .order('date', { referencedTable: 'workouts', ascending: true })
+          .order('workout_date', { referencedTable: 'workouts', ascending: true })
           .single();
         if (error) return { success: false, error: error.message };
         return { success: true, data };
@@ -239,10 +235,10 @@ export async function executeTool(
       case 'get_workouts': {
         // Apply filters before order so the chain always ends with .order()
         let query = supabase.from('workouts').select('*');
-        if (input.week_id) query = query.eq('week_id', input.week_id as string);
-        if (input.start_date) query = query.gte('date', input.start_date as string);
-        if (input.end_date) query = query.lte('date', input.end_date as string);
-        const { data, error } = await query.order('date', { ascending: true });
+        if (input.week_id) query = query.eq('week_id', input.week_id as number);
+        if (input.start_date) query = query.gte('workout_date', input.start_date as string);
+        if (input.end_date) query = query.lte('workout_date', input.end_date as string);
+        const { data, error } = await query.order('workout_date', { ascending: true });
         if (error) return { success: false, error: error.message };
         return { success: true, data };
       }
@@ -251,7 +247,7 @@ export async function executeTool(
         const { data, error } = await supabase
           .from('workouts')
           .select('*')
-          .eq('id', input.workout_id as string)
+          .eq('id', input.workout_id as number)
           .single();
         if (error?.code === 'PGRST116') return { success: false, error: 'Workout not found' };
         if (error) return { success: false, error: error.message };
@@ -262,7 +258,7 @@ export async function executeTool(
         const { data, error } = await supabase
           .from('workouts')
           .update(input.updates as Record<string, unknown>)
-          .eq('id', input.workout_id as string)
+          .eq('id', input.workout_id as number)
           .select()
           .single();
         if (error?.code === 'PGRST116') return { success: false, error: 'Workout not found' };
@@ -274,29 +270,29 @@ export async function executeTool(
         // Fetch both workouts
         const { data: a, error: errA } = await supabase
           .from('workouts')
-          .select('id, date, day_of_week')
-          .eq('id', input.workout_id_a as string)
+          .select('id, workout_date, day_of_week')
+          .eq('id', input.workout_id_a as number)
           .single();
         const { data: b, error: errB } = await supabase
           .from('workouts')
-          .select('id, date, day_of_week')
-          .eq('id', input.workout_id_b as string)
+          .select('id, workout_date, day_of_week')
+          .eq('id', input.workout_id_b as number)
           .single();
 
         if (errA || !a) return { success: false, error: 'First workout not found' };
         if (errB || !b) return { success: false, error: 'Second workout not found' };
 
-        // Swap dates and day_of_week
+        // Swap workout_date and day_of_week
         const [resA, resB] = await Promise.all([
           supabase
             .from('workouts')
-            .update({ date: b.date, day_of_week: b.day_of_week })
+            .update({ workout_date: b.workout_date, day_of_week: b.day_of_week })
             .eq('id', a.id)
             .select()
             .single(),
           supabase
             .from('workouts')
-            .update({ date: a.date, day_of_week: a.day_of_week })
+            .update({ workout_date: a.workout_date, day_of_week: a.day_of_week })
             .eq('id', b.id)
             .select()
             .single(),
@@ -313,7 +309,7 @@ export async function executeTool(
         const { data: existing, error: fetchErr } = await supabase
           .from('workouts')
           .select('notes')
-          .eq('id', input.workout_id as string)
+          .eq('id', input.workout_id as number)
           .single();
 
         if (fetchErr?.code === 'PGRST116') return { success: false, error: 'Workout not found' };
@@ -326,7 +322,7 @@ export async function executeTool(
         const { data, error } = await supabase
           .from('workouts')
           .update({ notes: newNotes })
-          .eq('id', input.workout_id as string)
+          .eq('id', input.workout_id as number)
           .select()
           .single();
 

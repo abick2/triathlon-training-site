@@ -1,18 +1,16 @@
 /**
- * GET    /api/workouts/:id   — fetch single workout
+ * GET    /api/workouts/:id   — fetch single workout with segments
  * PUT    /api/workouts/:id   — update workout fields
  * DELETE /api/workouts/:id   — delete workout
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getSupabaseClient } from '../../lib/supabase.js';
-import type { UpdateWorkoutBody, Workout } from '../../types/index.js';
+import type { UpdateWorkoutBody, WorkoutWithSegments } from '../../types/index.js';
 
-const VALID_SPORTS = ['swim', 'bike', 'run', 'brick', 'rest', 'strength'];
-const VALID_INTENSITIES = ['easy', 'moderate', 'hard', 'race', 'rest'];
+const VALID_WORKOUT_TYPES = ['Easy', 'Intervals', 'Tempo', 'Long', 'Cross-train', 'Rest', 'Shakeout', 'Race'];
 const VALID_DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function validateUpdateBody(body: unknown): { valid: true; data: UpdateWorkoutBody } | { valid: false; error: string } {
   if (!body || typeof body !== 'object') {
@@ -23,38 +21,39 @@ function validateUpdateBody(body: unknown): { valid: true; data: UpdateWorkoutBo
   if (Object.keys(b).length === 0) {
     return { valid: false, error: 'Update body must contain at least one field' };
   }
-  if (b.date !== undefined && (typeof b.date !== 'string' || !ISO_DATE.test(b.date))) {
-    return { valid: false, error: 'date must be ISO format YYYY-MM-DD' };
+  if (b.workout_date !== undefined && (typeof b.workout_date !== 'string' || !ISO_DATE.test(b.workout_date))) {
+    return { valid: false, error: 'workout_date must be ISO format YYYY-MM-DD' };
   }
   if (b.day_of_week !== undefined && !VALID_DAYS.includes(b.day_of_week as string)) {
     return { valid: false, error: `day_of_week must be one of: ${VALID_DAYS.join(', ')}` };
   }
-  if (b.sport !== undefined && !VALID_SPORTS.includes(b.sport as string)) {
-    return { valid: false, error: `sport must be one of: ${VALID_SPORTS.join(', ')}` };
+  if (b.workout_type !== undefined && !VALID_WORKOUT_TYPES.includes(b.workout_type as string)) {
+    return { valid: false, error: `workout_type must be one of: ${VALID_WORKOUT_TYPES.join(', ')}` };
   }
-  if (b.intensity !== undefined && !VALID_INTENSITIES.includes(b.intensity as string)) {
-    return { valid: false, error: `intensity must be one of: ${VALID_INTENSITIES.join(', ')}` };
-  }
-  if (b.title !== undefined && (typeof b.title !== 'string' || !b.title.trim())) {
-    return { valid: false, error: 'title must be a non-empty string' };
-  }
-  if (b.completed !== undefined && typeof b.completed !== 'boolean') {
-    return { valid: false, error: 'completed must be a boolean' };
-  }
-  if (b.duration_min !== undefined && b.duration_min !== null) {
-    if (!Number.isInteger(b.duration_min) || (b.duration_min as number) <= 0) {
-      return { valid: false, error: 'duration_min must be a positive integer or null' };
+  if (b.total_miles !== undefined && b.total_miles !== null) {
+    if (typeof b.total_miles !== 'number' || (b.total_miles as number) < 0) {
+      return { valid: false, error: 'total_miles must be a non-negative number or null' };
     }
+  }
+  if (b.is_rest_day !== undefined && typeof b.is_rest_day !== 'boolean') {
+    return { valid: false, error: 'is_rest_day must be a boolean' };
+  }
+  if (b.is_race_day !== undefined && typeof b.is_race_day !== 'boolean') {
+    return { valid: false, error: 'is_race_day must be a boolean' };
+  }
+  if (b.is_key_workout !== undefined && typeof b.is_key_workout !== 'boolean') {
+    return { valid: false, error: 'is_key_workout must be a boolean' };
   }
 
   return { valid: true, data: b as unknown as UpdateWorkoutBody };
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const id = req.query.id as string;
+  const idParam = req.query.id as string;
+  const id = Number(idParam);
 
-  if (!id || !UUID_RE.test(id)) {
-    return res.status(400).json({ error: 'Invalid workout id — must be a UUID' });
+  if (!idParam || !Number.isInteger(id) || id <= 0) {
+    return res.status(400).json({ error: 'Invalid workout id — must be a positive integer' });
   }
 
   const supabase = getSupabaseClient();
@@ -64,8 +63,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     try {
       const { data, error } = await supabase
         .from('workouts')
-        .select('*')
+        .select('*, workout_segments(*)')
         .eq('id', id)
+        .order('segment_order', { referencedTable: 'workout_segments', ascending: true })
         .single();
 
       if (error?.code === 'PGRST116') {
@@ -76,7 +76,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(500).json({ error: 'Failed to fetch workout' });
       }
 
-      return res.status(200).json(data as Workout);
+      return res.status(200).json(data as WorkoutWithSegments);
     } catch (err) {
       console.error(`[GET /api/workouts/${id}] Unexpected error:`, err);
       return res.status(500).json({ error: 'Internal server error' });
@@ -91,11 +91,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     try {
-      // Build update object from only provided fields
       const updates: Record<string, unknown> = {};
       const allowed: (keyof UpdateWorkoutBody)[] = [
-        'date', 'day_of_week', 'sport', 'title', 'description',
-        'duration_min', 'distance', 'intensity', 'completed', 'notes',
+        'workout_date', 'day_of_week', 'workout_type',
+        'total_miles', 'primary_pace_zone', 'notes',
+        'is_rest_day', 'is_race_day', 'is_key_workout',
       ];
       for (const key of allowed) {
         if (key in validation.data) {
@@ -118,7 +118,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(500).json({ error: 'Failed to update workout' });
       }
 
-      return res.status(200).json(data as Workout);
+      return res.status(200).json(data as WorkoutWithSegments);
     } catch (err) {
       console.error(`[PUT /api/workouts/${id}] Unexpected error:`, err);
       return res.status(500).json({ error: 'Internal server error' });

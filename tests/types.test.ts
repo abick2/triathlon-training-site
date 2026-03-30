@@ -6,45 +6,62 @@
 
 import { describe, it, expect } from 'vitest';
 import type {
-  Sport,
-  Intensity,
+  WorkoutType,
+  Phase,
+  SegmentType,
   DayOfWeek,
-  Workout,
-  TrainingWeek,
-  CreateWorkoutBody,
 } from '../types/index.js';
 import {
   fixtureWeek,
-  fixtureWorkoutSwim,
-  fixtureWorkoutRun,
+  fixtureWorkoutEasy,
   fixtureWorkoutRest,
+  fixtureWorkoutIntervals,
+  fixtureSegment,
   fixtureCreateWorkoutBody,
   fixtureUpdateWorkoutBody,
   fixtureWeekWithWorkouts,
   fixtureCoachMemory,
+  fixturePlan,
+  fixturePaceTarget,
+  fixturePlanWithPaceTargets,
+  fixtureWorkoutWithSegments,
 } from './fixtures/index.js';
 
 // ─── Enum coverage ────────────────────────────────────────────────────────────
 
-const VALID_SPORTS: Sport[] = ['swim', 'bike', 'run', 'brick', 'rest', 'strength'];
-const VALID_INTENSITIES: Intensity[] = ['easy', 'moderate', 'hard', 'race', 'rest'];
+const VALID_WORKOUT_TYPES: WorkoutType[] = [
+  'Easy', 'Intervals', 'Tempo', 'Long', 'Cross-train', 'Rest', 'Shakeout', 'Race',
+];
+const VALID_PHASES: Phase[] = ['Build', 'Taper', 'Race'];
+const VALID_SEGMENT_TYPES: SegmentType[] = [
+  'warmup', 'main_set', 'interval_rep', 'cooldown', 'stride', 'cross_train',
+];
 const VALID_DAYS: DayOfWeek[] = [
   'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday',
 ];
 
 describe('type enums', () => {
-  it('covers all 6 sport values', () => {
-    expect(VALID_SPORTS).toHaveLength(6);
-    expect(VALID_SPORTS).toContain('swim');
-    expect(VALID_SPORTS).toContain('bike');
-    expect(VALID_SPORTS).toContain('run');
-    expect(VALID_SPORTS).toContain('brick');
-    expect(VALID_SPORTS).toContain('rest');
-    expect(VALID_SPORTS).toContain('strength');
+  it('covers all 8 workout_type values', () => {
+    expect(VALID_WORKOUT_TYPES).toHaveLength(8);
+    expect(VALID_WORKOUT_TYPES).toContain('Easy');
+    expect(VALID_WORKOUT_TYPES).toContain('Intervals');
+    expect(VALID_WORKOUT_TYPES).toContain('Tempo');
+    expect(VALID_WORKOUT_TYPES).toContain('Long');
+    expect(VALID_WORKOUT_TYPES).toContain('Cross-train');
+    expect(VALID_WORKOUT_TYPES).toContain('Rest');
+    expect(VALID_WORKOUT_TYPES).toContain('Shakeout');
+    expect(VALID_WORKOUT_TYPES).toContain('Race');
   });
 
-  it('covers all 5 intensity values', () => {
-    expect(VALID_INTENSITIES).toHaveLength(5);
+  it('covers all 3 phase values', () => {
+    expect(VALID_PHASES).toHaveLength(3);
+    expect(VALID_PHASES).toContain('Build');
+    expect(VALID_PHASES).toContain('Taper');
+    expect(VALID_PHASES).toContain('Race');
+  });
+
+  it('covers all 6 segment_type values', () => {
+    expect(VALID_SEGMENT_TYPES).toHaveLength(6);
   });
 
   it('covers all 7 days of week', () => {
@@ -52,25 +69,75 @@ describe('type enums', () => {
   });
 });
 
+// ─── TrainingPlan fixture ─────────────────────────────────────────────────────
+
+describe('TrainingPlan fixture', () => {
+  it('has required fields', () => {
+    expect(fixturePlan.id).toBeGreaterThan(0);
+    expect(typeof fixturePlan.athlete_name).toBe('string');
+    expect(typeof fixturePlan.race_name).toBe('string');
+    expect(fixturePlan.race_date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(typeof fixturePlan.goal_time).toBe('string');
+    expect(typeof fixturePlan.goal_pace_per_mile).toBe('string');
+    expect(typeof fixturePlan.fitness_level).toBe('string');
+  });
+
+  it('pr_time and pr_notes are string or null', () => {
+    expect(fixturePlan.pr_time === null || typeof fixturePlan.pr_time === 'string').toBe(true);
+    expect(fixturePlan.pr_notes === null || typeof fixturePlan.pr_notes === 'string').toBe(true);
+  });
+});
+
+// ─── PaceTarget fixture ───────────────────────────────────────────────────────
+
+describe('PaceTarget fixture', () => {
+  it('has required fields', () => {
+    expect(fixturePaceTarget.id).toBeGreaterThan(0);
+    expect(fixturePaceTarget.plan_id).toBe(fixturePlan.id);
+    expect(typeof fixturePaceTarget.zone_name).toBe('string');
+    expect(fixturePaceTarget.pace_min).toMatch(/^\d+:\d{2}$/);
+    expect(fixturePaceTarget.pace_max).toMatch(/^\d+:\d{2}$/);
+  });
+});
+
+// ─── PlanWithPaceTargets fixture ──────────────────────────────────────────────
+
+describe('PlanWithPaceTargets fixture', () => {
+  it('contains the plan fields', () => {
+    expect(fixturePlanWithPaceTargets.id).toBe(fixturePlan.id);
+    expect(fixturePlanWithPaceTargets.race_name).toBe(fixturePlan.race_name);
+  });
+
+  it('pace_targets is a non-empty array', () => {
+    expect(Array.isArray(fixturePlanWithPaceTargets.pace_targets)).toBe(true);
+    expect(fixturePlanWithPaceTargets.pace_targets.length).toBeGreaterThan(0);
+  });
+});
+
 // ─── TrainingWeek fixture ─────────────────────────────────────────────────────
 
 describe('TrainingWeek fixture', () => {
   it('has required fields', () => {
-    expect(fixtureWeek.id).toBeTruthy();
+    expect(fixtureWeek.id).toBeGreaterThan(0);
     expect(typeof fixtureWeek.week_number).toBe('number');
     expect(fixtureWeek.week_number).toBeGreaterThan(0);
-    expect(fixtureWeek.start_date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-    expect(fixtureWeek.end_date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-    expect(typeof fixtureWeek.theme).toBe('string');
+    expect(fixtureWeek.week_start).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(fixtureWeek.week_end).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(VALID_PHASES).toContain(fixtureWeek.phase);
+    expect(typeof fixtureWeek.label).toBe('string');
   });
 
-  it('end_date is on or after start_date', () => {
-    expect(fixtureWeek.end_date >= fixtureWeek.start_date).toBe(true);
+  it('week_end is on or after week_start', () => {
+    expect(fixtureWeek.week_end >= fixtureWeek.week_start).toBe(true);
   });
 
   it('notes is string or null', () => {
+    expect(fixtureWeek.notes === null || typeof fixtureWeek.notes === 'string').toBe(true);
+  });
+
+  it('target_mileage is a number or null', () => {
     expect(
-      fixtureWeek.notes === null || typeof fixtureWeek.notes === 'string'
+      fixtureWeek.target_mileage === null || typeof fixtureWeek.target_mileage === 'number'
     ).toBe(true);
   });
 });
@@ -78,39 +145,72 @@ describe('TrainingWeek fixture', () => {
 // ─── Workout fixtures ─────────────────────────────────────────────────────────
 
 describe('Workout fixtures', () => {
-  const workouts: Workout[] = [fixtureWorkoutSwim, fixtureWorkoutRun, fixtureWorkoutRest];
+  const workouts = [fixtureWorkoutEasy, fixtureWorkoutRest, fixtureWorkoutIntervals];
 
-  it.each(workouts)('workout "$title" has required fields', (workout) => {
-    expect(workout.id).toBeTruthy();
-    expect(workout.week_id).toBeTruthy();
-    expect(workout.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  it.each(workouts)('workout (id=$id) has required fields', (workout) => {
+    expect(workout.id).toBeGreaterThan(0);
+    expect(workout.week_id).toBeGreaterThan(0);
+    expect(workout.plan_id).toBeGreaterThan(0);
+    expect(workout.workout_date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(VALID_DAYS).toContain(workout.day_of_week);
-    expect(VALID_SPORTS).toContain(workout.sport);
-    expect(typeof workout.title).toBe('string');
-    expect(workout.title.length).toBeGreaterThan(0);
-    expect(VALID_INTENSITIES).toContain(workout.intensity);
-    expect(typeof workout.completed).toBe('boolean');
+    expect(VALID_WORKOUT_TYPES).toContain(workout.workout_type);
+    expect(typeof workout.is_rest_day).toBe('boolean');
+    expect(typeof workout.is_race_day).toBe('boolean');
+    expect(typeof workout.is_key_workout).toBe('boolean');
   });
 
-  it('swim workout has fully scripted description', () => {
-    expect(fixtureWorkoutSwim.description).toContain('Warm-Up');
-    expect(fixtureWorkoutSwim.description).toContain('Main Set');
-    expect(fixtureWorkoutSwim.description).toContain('Cool-Down');
+  it('rest workout has correct flags', () => {
+    expect(fixtureWorkoutRest.workout_type).toBe('Rest');
+    expect(fixtureWorkoutRest.is_rest_day).toBe(true);
+    expect(fixtureWorkoutRest.total_miles).toBeNull();
+    expect(fixtureWorkoutRest.primary_pace_zone).toBeNull();
   });
 
-  it('rest workout has rest intensity', () => {
-    expect(fixtureWorkoutRest.sport).toBe('rest');
-    expect(fixtureWorkoutRest.intensity).toBe('rest');
-    expect(fixtureWorkoutRest.duration_min).toBeNull();
-    expect(fixtureWorkoutRest.distance).toBeNull();
+  it('intervals workout is flagged as key workout', () => {
+    expect(fixtureWorkoutIntervals.workout_type).toBe('Intervals');
+    expect(fixtureWorkoutIntervals.is_key_workout).toBe(true);
+    expect(fixtureWorkoutIntervals.total_miles).toBeGreaterThan(0);
   });
 
-  it('duration_min is positive integer or null', () => {
+  it('total_miles is a non-negative number or null', () => {
     workouts.forEach((w) => {
-      if (w.duration_min !== null) {
-        expect(Number.isInteger(w.duration_min)).toBe(true);
-        expect(w.duration_min).toBeGreaterThan(0);
+      if (w.total_miles !== null) {
+        expect(typeof w.total_miles).toBe('number');
+        expect(w.total_miles).toBeGreaterThanOrEqual(0);
       }
+    });
+  });
+});
+
+// ─── WorkoutSegment fixture ───────────────────────────────────────────────────
+
+describe('WorkoutSegment fixture', () => {
+  it('has required fields', () => {
+    expect(fixtureSegment.id).toBeGreaterThan(0);
+    expect(fixtureSegment.workout_id).toBeGreaterThan(0);
+    expect(fixtureSegment.segment_order).toBeGreaterThan(0);
+    expect(VALID_SEGMENT_TYPES).toContain(fixtureSegment.segment_type);
+  });
+
+  it('nullable fields are correct types', () => {
+    expect(fixtureSegment.reps === null || typeof fixtureSegment.reps === 'number').toBe(true);
+    expect(fixtureSegment.distance_miles === null || typeof fixtureSegment.distance_miles === 'number').toBe(true);
+    expect(fixtureSegment.duration_minutes === null || typeof fixtureSegment.duration_minutes === 'number').toBe(true);
+  });
+});
+
+// ─── WorkoutWithSegments fixture ──────────────────────────────────────────────
+
+describe('WorkoutWithSegments fixture', () => {
+  it('contains workout fields and segments array', () => {
+    expect(fixtureWorkoutWithSegments.id).toBe(fixtureWorkoutEasy.id);
+    expect(Array.isArray(fixtureWorkoutWithSegments.workout_segments)).toBe(true);
+    expect(fixtureWorkoutWithSegments.workout_segments.length).toBeGreaterThan(0);
+  });
+
+  it('all segments belong to this workout', () => {
+    fixtureWorkoutWithSegments.workout_segments.forEach((s) => {
+      expect(s.workout_id).toBe(fixtureWorkoutWithSegments.id);
     });
   });
 });
@@ -150,11 +250,11 @@ describe('CoachMemory fixture', () => {
 
 describe('CreateWorkoutBody fixture', () => {
   it('has required fields', () => {
-    expect(fixtureCreateWorkoutBody.week_id).toBeTruthy();
-    expect(fixtureCreateWorkoutBody.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(fixtureCreateWorkoutBody.week_id).toBeGreaterThan(0);
+    expect(fixtureCreateWorkoutBody.plan_id).toBeGreaterThan(0);
+    expect(fixtureCreateWorkoutBody.workout_date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(VALID_DAYS).toContain(fixtureCreateWorkoutBody.day_of_week);
-    expect(VALID_SPORTS).toContain(fixtureCreateWorkoutBody.sport);
-    expect(VALID_INTENSITIES).toContain(fixtureCreateWorkoutBody.intensity);
+    expect(VALID_WORKOUT_TYPES).toContain(fixtureCreateWorkoutBody.workout_type);
   });
 });
 
@@ -162,14 +262,19 @@ describe('CreateWorkoutBody fixture', () => {
 
 describe('UpdateWorkoutBody fixture', () => {
   it('all present fields are valid types', () => {
-    if (fixtureUpdateWorkoutBody.completed !== undefined) {
-      expect(typeof fixtureUpdateWorkoutBody.completed).toBe('boolean');
+    if (fixtureUpdateWorkoutBody.workout_type !== undefined) {
+      expect(VALID_WORKOUT_TYPES).toContain(fixtureUpdateWorkoutBody.workout_type);
     }
-    if (fixtureUpdateWorkoutBody.sport !== undefined) {
-      expect(VALID_SPORTS).toContain(fixtureUpdateWorkoutBody.sport);
+    if (fixtureUpdateWorkoutBody.is_rest_day !== undefined) {
+      expect(typeof fixtureUpdateWorkoutBody.is_rest_day).toBe('boolean');
     }
-    if (fixtureUpdateWorkoutBody.intensity !== undefined) {
-      expect(VALID_INTENSITIES).toContain(fixtureUpdateWorkoutBody.intensity);
+    if (fixtureUpdateWorkoutBody.workout_date !== undefined) {
+      expect(fixtureUpdateWorkoutBody.workout_date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    }
+    if (fixtureUpdateWorkoutBody.notes !== undefined) {
+      expect(
+        fixtureUpdateWorkoutBody.notes === null || typeof fixtureUpdateWorkoutBody.notes === 'string'
+      ).toBe(true);
     }
   });
 });
@@ -180,10 +285,10 @@ describe('date format validation', () => {
   const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
   it('fixture dates are ISO YYYY-MM-DD', () => {
-    expect(fixtureWeek.start_date).toMatch(ISO_DATE);
-    expect(fixtureWeek.end_date).toMatch(ISO_DATE);
-    expect(fixtureWorkoutSwim.date).toMatch(ISO_DATE);
-    expect(fixtureWorkoutRun.date).toMatch(ISO_DATE);
-    expect(fixtureCreateWorkoutBody.date).toMatch(ISO_DATE);
+    expect(fixtureWeek.week_start).toMatch(ISO_DATE);
+    expect(fixtureWeek.week_end).toMatch(ISO_DATE);
+    expect(fixtureWorkoutEasy.workout_date).toMatch(ISO_DATE);
+    expect(fixtureWorkoutIntervals.workout_date).toMatch(ISO_DATE);
+    expect(fixtureCreateWorkoutBody.workout_date).toMatch(ISO_DATE);
   });
 });
