@@ -858,6 +858,7 @@ footer {
 }
 
 .prog-week--base    .prog-bar { background: var(--color-phase-base); }
+.prog-week--build   .prog-bar { background: var(--color-phase-build); }
 .prog-week--build-1 .prog-bar { background: var(--color-phase-build); }
 .prog-week--build-2 .prog-bar { background: var(--color-phase-build); }
 .prog-week--peak    .prog-bar { background: var(--color-phase-peak); }
