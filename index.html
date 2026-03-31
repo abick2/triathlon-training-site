@@ -646,7 +646,9 @@
         const key = card.dataset.workout;
         const workoutId = card.dataset.workoutId;
 
-        dialogDay.textContent = card.querySelector('.day-name').textContent;
+        const workoutDate = card.dataset.workoutDate;
+        const dayName = card.querySelector('.day-name').childNodes[0].textContent.trim();
+        dialogDay.textContent = workoutDate ? dayName + ' ' + formatShortDate(workoutDate) : dayName;
 
         const diffBadge = card.querySelector('.difficulty-badge');
         dialogDiff.textContent = diffBadge.textContent;
@@ -744,6 +746,12 @@
         return months[m - 1] + ' ' + d + ', ' + y;
       }
 
+      function formatShortDate(isoDate) {
+        // 'YYYY-MM-DD' → 'M/D' (no leading zeros)
+        const [, m, d] = isoDate.split('-');
+        return parseInt(m, 10) + '/' + parseInt(d, 10);
+      }
+
       function formatWeekRange(weekStart, weekEnd) {
         const opts = { month: 'short', day: 'numeric' };
         const start = new Date(weekStart + 'T00:00:00');
@@ -807,6 +815,7 @@
           article.setAttribute('data-difficulty', difficulty);
           article.setAttribute('data-workout', 'run-' + day.toLowerCase());
           article.setAttribute('data-workout-id', workout.id);
+          article.setAttribute('data-workout-date', workout.workout_date);
 
           const miles = workout.total_miles;
           const footerHTML = workout.is_rest_day
@@ -820,7 +829,7 @@
 
           article.innerHTML =
             '<div class="card-header">' +
-              '<span class="day-name">' + day + '</span>' +
+              '<span class="day-name">' + day + ' <span class="day-date">' + formatShortDate(workout.workout_date) + '</span></span>' +
               '<span class="difficulty-badge">' + diffLabel + '</span>' +
             '</div>' +
             '<h3 class="workout-title">' + title + '</h3>' +

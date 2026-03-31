@@ -227,6 +227,11 @@ header {
   color: var(--color-secondary);
 }
 
+.day-date {
+  font-weight: 400;
+  opacity: 0.65;
+}
+
 /* Difficulty Badges */
 .difficulty-badge {
   font-family: var(--font-body);
