@@ -879,9 +879,6 @@ footer {
   color: var(--color-dark);
 }
 
-.prog-week--future {
-  opacity: 0.35;
-}
 
 .prog-value {
   font-family: var(--font-body);
