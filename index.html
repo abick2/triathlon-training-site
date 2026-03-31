@@ -45,6 +45,7 @@
             <span class="hero-number" id="run-hero-number">&mdash;</span>
             <span class="hero-unit">miles</span>
           </div>
+          <p class="hero-week-range reveal-on-scroll" id="run-hero-week-range"></p>
           <p class="hero-description reveal-on-scroll" id="run-hero-description">
             Loading this week&rsquo;s training plan&hellip;
           </p>
@@ -743,6 +744,18 @@
         return months[m - 1] + ' ' + d + ', ' + y;
       }
 
+      function formatWeekRange(weekStart, weekEnd) {
+        const opts = { month: 'short', day: 'numeric' };
+        const start = new Date(weekStart + 'T00:00:00');
+        const end   = new Date(weekEnd   + 'T00:00:00');
+        const startStr = start.toLocaleDateString('en-US', opts);
+        const endStr   = end.toLocaleDateString('en-US', opts);
+        // Only show year on end if different from start
+        const endYear = end.getFullYear();
+        const startYear = start.getFullYear();
+        return startStr + (startYear !== endYear ? ', ' + startYear : '') + ' – ' + endStr + ', ' + endYear;
+      }
+
       function renderRunHero(currentWeek, plan) {
         const totalMiles = currentWeek
           ? (currentWeek.workouts || []).reduce((sum, w) => sum + (w.total_miles || 0), 0)
@@ -750,6 +763,13 @@
 
         const heroNum = document.getElementById('run-hero-number');
         heroNum.textContent = totalMiles != null ? totalMiles : '—';
+
+        const rangeEl = document.getElementById('run-hero-week-range');
+        if (currentWeek) {
+          rangeEl.textContent = formatWeekRange(currentWeek.week_start, currentWeek.week_end);
+        } else {
+          rangeEl.textContent = '';
+        }
 
         const desc = document.getElementById('run-hero-description');
         if (currentWeek && plan) {

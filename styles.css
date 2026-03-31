@@ -154,6 +154,16 @@ header {
   color: var(--color-secondary);
 }
 
+.hero-week-range {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: clamp(0.95rem, 1.4vw, 1.1rem);
+  color: var(--color-secondary);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: var(--space-sm);
+}
+
 .hero-description {
   font-family: var(--font-body);
   font-weight: 300;
